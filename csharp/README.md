@@ -35,10 +35,11 @@ it's the file meant to be pasted directly into a review agent's prompt or instru
 
 See [`/agent-instructions`](../agent-instructions) for ready-to-copy files:
 
-- `copilot-instructions.md` - drop into `.github/copilot-instructions.md`
+- `pr-review-agent-workflow.yml` - recommended: a GitHub Actions workflow that references
+  this standards repo live on every PR (no Copilot needed, nothing copied but this one file)
+- `copilot-instructions.md` - alternative: drop into `.github/copilot-instructions.md` if
+  using GitHub Copilot's native PR review instead
 - `csharp.instructions.md` - path-scoped Copilot instructions for `**/*.cs`
-- `pr-review-agent-workflow.yml` - example GitHub Actions workflow that runs an
-  agent-based review against these standards on every pull request
 
 ## Philosophy
 

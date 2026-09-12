@@ -33,12 +33,35 @@ Currently covers:
 ## How to implement this in your own repo (or your org's repos)
 
 These standards do nothing by themselves - they need to be wired into whichever agent
-actually reviews your pull requests. Pick the path that matches your setup; you can combine
-more than one.
+actually reviews your pull requests.
 
-### Option A: GitHub Copilot's built-in PR review (no workflow needed)
+### Recommended: a GitHub Actions workflow (works on any repo, personal included)
 
-This is the lowest-effort path if your repo already uses GitHub Copilot.
+This is the path to use if you don't have (or don't want to depend on) a GitHub Copilot
+subscription, or you're on a personal account rather than an org with a Copilot policy. It
+needs nothing but GitHub Actions (free on public repos, a generous free quota on private
+ones) and an API key for an LLM of your choice. Nothing gets copied into your repo - the
+workflow checks out this standards repo fresh on every run and reviews against it live, so
+there's no vendored `.md` content to keep in sync by hand.
+
+1. Copy [`agent-instructions/pr-review-agent-workflow.yml`](./agent-instructions/pr-review-agent-workflow.yml)
+   to `.github/workflows/pr-review.yml` in the target repo.
+2. Replace `<owner>/code-standards` with wherever this repo actually lives (this repo itself,
+   or your own fork of it if you've customized the rules).
+3. Add a repository secret `LLM_API_KEY` (Settings -> Secrets and variables -> Actions).
+   Optionally add repository variables `LLM_API_BASE_URL`/`LLM_MODEL` to point at a different
+   OpenAI-Chat-Completions-compatible endpoint (Azure OpenAI, a self-hosted server, etc.) -
+   it defaults to OpenAI's API with a small, cheap model.
+4. Commit the workflow file. It runs automatically on every `pull_request` event
+   (opened/synchronize/reopened), builds the diff, picks whichever `REVIEW-CHECKLIST.md`
+   matches the changed files (C# and/or Terraform), and posts the findings as a PR comment -
+   nothing further to trigger by hand.
+
+### Alternative: GitHub Copilot's built-in PR review
+
+Use this instead if the repo already has a Copilot subscription (personal Individual/Pro
+plans work, not just org/Enterprise) and you're fine with copying a couple of instruction
+files into `.github/` rather than referencing this repo live.
 
 1. In the repo you want to protect, create `.github/copilot-instructions.md` using
    [`agent-instructions/copilot-instructions.md`](./agent-instructions/copilot-instructions.md) as your
@@ -50,44 +73,16 @@ This is the lowest-effort path if your repo already uses GitHub Copilot.
    - [`agent-instructions/terraform.instructions.md`](./agent-instructions/terraform.instructions.md) ->
      `.github/instructions/terraform.instructions.md` (`applyTo: "**/*.tf"`)
 3. Commit the files to the repo's default branch.
-4. Confirm Copilot code review is turned on for the repo (repo Settings -> Copilot, or your
-   org's Copilot policy) - it needs to be enabled for these instructions to be read at all.
-5. Open a PR to verify: Copilot's automatic review comment should now reference the rules
-   (e.g., flagging a raw `IConfiguration` injection, a missing `AsNoTracking()`, a storage
-   account key used where a managed identity + RBAC role assignment was available instead).
+4. Confirm Copilot code review is turned on for the repo (personal account: your own Copilot
+   settings for that repo; org account: repo Settings -> Copilot, or the org's Copilot
+   policy) - it needs to be enabled for these instructions to be read at all.
+5. Open a PR to verify: Copilot's automatic review comment should now reference the rules.
 
-To roll this out across an entire organization rather than one repo at a time, commit the
-same files into a template repository your org uses for new repos, or push them to every
-existing repo via a script/Actions workflow that runs once across the org.
-
-### Option B: A custom agent running on a GitHub Actions runner
-
-Use this if you want a specific model/provider, a fully custom prompt, or want the review to
-run as a distinct bot account rather than relying on Copilot's built-in review.
-
-1. Copy [`agent-instructions/pr-review-agent-workflow.yml`](./agent-instructions/pr-review-agent-workflow.yml)
-   to `.github/workflows/pr-review.yml` in the target repo.
-2. Replace `<org>/code-standards` with wherever this repo actually lives (this repo itself,
-   or your own fork of it if you've customized the rules).
-3. Replace the placeholder "Run standards-based review" step with whichever review
-   agent/action/CLI your organization already runs on its runners, and add whatever secret
-   it needs under the repo's or org's Actions secrets.
-4. Commit the workflow file. It runs automatically on every `pull_request` event
-   (opened/synchronize/reopened) and checks out this standards repo alongside the PR's code
-   so the agent has the rules in front of it when it reviews the diff.
-
-### Keeping the rules in sync
-
-Whichever option you use, the underlying rule content can drift from this source repo over
-time. Two ways to manage that:
-
-- **Link out** (simplest): keep the instructions files short, and have them reference the
-  live URL of this repo's `csharp/`/`terraform-azure/` folders for full detail, as the
-  agent-instructions files already do.
-- **Vendor a copy** (more control, more upkeep): add this repo as a git submodule (e.g. at
-  `standards/csharp`) or copy the relevant folder in directly, and point your instructions
-  files at the local copy. Update it deliberately when you pull in changes, rather than
-  inheriting changes automatically.
+Because this approach copies files into the consuming repo, keeping them in sync with this
+source repo over time is a manual step - re-copy the instructions files (or the condensed
+`REVIEW-CHECKLIST.md` content into them) when the standards here change. The Actions-workflow
+approach above doesn't have this problem, since it references the standards repo live on
+every run instead of copying anything.
 
 ## Quick start (browsing the standards themselves)
 

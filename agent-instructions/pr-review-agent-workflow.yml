@@ -1,17 +1,27 @@
 # Copy to `.github/workflows/pr-review.yml` in the consuming repository.
 #
-# This is an example of running a custom LLM-based review agent on a GitHub-hosted runner,
-# for teams that want more control than Copilot's built-in PR review offers (a different
-# model/provider, a fully custom prompt, posting as a specific bot account, gating on labels,
-# etc). If the team is happy with GitHub Copilot's native PR review reading
-# `.github/copilot-instructions.md`, this workflow is not needed at all - see
-# `copilot-instructions.md`, `csharp.instructions.md`, and `terraform.instructions.md` in
-# this folder instead.
+# Automated PR review for a personal (or any) GitHub repo, with no dependency on a GitHub
+# Copilot subscription or any org/enterprise policy - just GitHub Actions (free on public
+# repos, and a generous free quota on private ones) plus an API key for an LLM of your
+# choice. This workflow checks out the code-standards repo fresh on every run rather than
+# copying any of its files into this repository - the standards are referenced live, so
+# there's nothing to keep in sync by hand and no duplicated .md content sitting in your repo.
 #
-# The "Run standards-based review" step below is a placeholder - replace it with whichever
-# review agent/action/CLI your organization already runs on its runners. The important part
-# of this workflow is the two checkouts (the PR's code and this standards repo) so that
-# whatever agent you plug in has both the diff and the checklists in front of it.
+# Setup:
+#   1. Replace <owner>/code-standards below with wherever this standards repo actually lives.
+#   2. Add a repository secret `LLM_API_KEY` (Settings -> Secrets and variables -> Actions).
+#   3. Optionally add repository variables `LLM_API_BASE_URL` and `LLM_MODEL` to point at a
+#      different OpenAI-Chat-Completions-compatible endpoint (this works against OpenAI
+#      itself, Azure OpenAI, or any self-hosted server implementing the same API shape) -
+#      otherwise it defaults to OpenAI's API with a small, cheap model.
+#   4. Commit this file. It runs automatically on every pull_request event and posts its
+#      findings as a comment on the PR - nothing further to trigger by hand.
+#
+# If you'd rather use GitHub Copilot's native PR review instead of running your own LLM call
+# (requires a personal Copilot subscription, and means copying instruction files into
+# `.github/`), see `copilot-instructions.md`, `csharp.instructions.md`, and
+# `terraform.instructions.md` in this folder instead - this workflow is the alternative that
+# needs none of that.
 
 name: PR Review Against Standards
 
@@ -35,17 +45,69 @@ jobs:
       - name: Checkout code-standards
         uses: actions/checkout@v4
         with:
-          repository: <org>/code-standards
+          repository: <owner>/code-standards
           path: .code-standards
           ref: main
 
-      - name: Run standards-based review
-        # Replace this step with your organization's review agent/action of choice.
-        # Point its prompt/config at:
-        #   .code-standards/csharp/REVIEW-CHECKLIST.md            (for C# changes)
-        #   .code-standards/terraform-azure/REVIEW-CHECKLIST.md   (for Terraform/Azure changes)
-        # and have it post findings back to the PR as a review comment, most severe first.
-        # For Terraform, treat any static access key/SAS token/connection string used where
-        # RBAC or managed identity was available instead as a high-priority finding.
+      - name: Build the diff and pick the relevant checklist(s)
+        id: diff
         run: |
-          echo "Wire up your review agent here, pointed at .code-standards/"
+          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1
+          git diff "origin/${{ github.event.pull_request.base.ref }}...HEAD" > pr.diff
+
+          CHANGED=$(git diff --name-only "origin/${{ github.event.pull_request.base.ref }}...HEAD")
+          CHECKLISTS=""
+          if echo "$CHANGED" | grep -q '\.cs$'; then
+            CHECKLISTS="$CHECKLISTS .code-standards/csharp/REVIEW-CHECKLIST.md"
+          fi
+          if echo "$CHANGED" | grep -q '\.tf$'; then
+            CHECKLISTS="$CHECKLISTS .code-standards/terraform-azure/REVIEW-CHECKLIST.md"
+          fi
+
+          if [ -n "$CHECKLISTS" ]; then
+            cat $CHECKLISTS > checklist.md
+            echo "has_checklist=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_checklist=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run the review
+        if: steps.diff.outputs.has_checklist == 'true'
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_API_BASE_URL: ${{ vars.LLM_API_BASE_URL }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+        run: |
+          BASE_URL="${LLM_API_BASE_URL:-https://api.openai.com/v1}"
+          MODEL="${LLM_MODEL:-gpt-4o-mini}"
+
+          PROMPT=$(cat <<PROMPT_EOF
+          You are reviewing a GitHub pull request diff against the coding standards checklist
+          below. Only flag issues actually visible in the diff - don't invent violations in
+          code the diff doesn't touch. For each finding, name the file/line, what's wrong, and
+          why, most severe first. If nothing meaningful is found, say so briefly instead of
+          inventing issues.
+
+          STANDARDS CHECKLIST:
+          $(cat checklist.md)
+
+          PULL REQUEST DIFF:
+          $(head -c 60000 pr.diff)
+          PROMPT_EOF
+          )
+
+          jq -n --arg model "$MODEL" --arg content "$PROMPT" \
+            '{model: $model, messages: [{role: "user", content: $content}]}' > request.json
+
+          curl -sS "$BASE_URL/chat/completions" \
+            -H "Authorization: Bearer $LLM_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @request.json > response.json
+
+          jq -r '.choices[0].message.content' response.json > review.md
+
+      - name: Post review as a PR comment
+        if: steps.diff.outputs.has_checklist == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md
