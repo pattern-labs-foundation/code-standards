@@ -1,0 +1,30 @@
+# Copy this file to `.github/workflows/standards-review.yml` in YOUR repo.
+#
+# This is the only file you need. It does not contain any rules: it calls the
+# reusable workflow in the public code-standards repo, which holds all of them.
+# When the standards are updated there, you pick the changes up automatically
+# with nothing to re-copy.
+#
+# Works on any repo, any account, any org, including free personal accounts:
+# it runs on GitHub-hosted runners (free minutes), uses only the automatic
+# GITHUB_TOKEN, and calls no external or paid service.
+
+name: Standards Review
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  standards:
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+    # All inputs are optional. Defaults: enforce the main branch of the
+    # standards, comment on the PR, and fail the check on blocking violations.
+    # with:
+    #   standards_ref: v1.0.0        # pin to a tag so rules can't change under you
+    #   fail_on_violation: false     # report only, never fail the check
+    #   comment_on_pr: false         # job summary only, no PR comment

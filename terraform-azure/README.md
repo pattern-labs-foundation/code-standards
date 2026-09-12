@@ -38,3 +38,8 @@ the RBAC/identity path, and treat any static, long-lived, directly-usable token 
 that should be justified, not assumed.** A leaked key works for anyone, forever, until
 manually rotated. A leaked/compromised identity is scoped, auditable, and can be revoked
 through the same role-assignment mechanism that granted it.
+
+## Enforcing these rules
+
+Add one workflow file to your repo and every PR is checked against these standards
+automatically. See [`/agent-instructions`](../agent-instructions) for setup.

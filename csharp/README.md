@@ -31,15 +31,10 @@ it's the file meant to be pasted directly into a review agent's prompt or instru
 | 15 | Resource Management (`IDisposable`) | [15-resource-management.md](./15-resource-management.md) |
 | - | **Consolidated agent checklist** | [REVIEW-CHECKLIST.md](./REVIEW-CHECKLIST.md) |
 
-## How to use this with a review agent
+## Enforcing these rules
 
-See [`/agent-instructions`](../agent-instructions) for ready-to-copy files:
-
-- `pr-review-agent-workflow.yml` - recommended: a GitHub Actions workflow that references
-  this standards repo live on every PR (no Copilot needed, nothing copied but this one file)
-- `copilot-instructions.md` - alternative: drop into `.github/copilot-instructions.md` if
-  using GitHub Copilot's native PR review instead
-- `csharp.instructions.md` - path-scoped Copilot instructions for `**/*.cs`
+Add one workflow file to your repo and every PR is checked against these standards
+automatically. See [`/agent-instructions`](../agent-instructions) for setup.
 
 ## Philosophy
 

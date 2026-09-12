@@ -1,39 +1,79 @@
-# Agent Instructions
+# Setup
 
-Starting points for wiring standards from [`/csharp`](../csharp) and
-[`/terraform-azure`](../terraform-azure) into a consuming repository's PR review process.
+Add one file to your repo. It calls the workflow in this repo, so the rules stay here and you
+get updates automatically.
 
-## Recommended: a GitHub Actions workflow (any repo, personal included, no copy-paste)
+Works on any repo including free personal accounts. No API key, no Copilot, no paid anything.
 
-Use [`pr-review-agent-workflow.yml`](./pr-review-agent-workflow.yml). Copy this one file to
-`.github/workflows/pr-review.yml` in the consuming repo - it needs no GitHub Copilot
-subscription and no org/enterprise policy, just Actions (free on public repos, a generous
-free quota on private ones) and an API key for an LLM of your choice.
+## Single repo
 
-Nothing else gets copied: the workflow checks out this standards repo fresh into a temp path
-on every run, reads whichever `REVIEW-CHECKLIST.md` matches the changed files (C# and/or
-Terraform), reviews the diff against it, and posts the findings as a PR comment. The
-checkout disappears when the job ends - the consuming repo's history only ever has the one
-workflow file, never a copy of any `csharp/`/`terraform-azure/` content.
+Copy [`caller-workflow.yml`](./caller-workflow.yml) to `.github/workflows/standards-review.yml`:
 
-## Alternative: GitHub Copilot's PR code review
+```yaml
+name: Standards Review
 
-Copilot's automatic PR review (and Copilot Chat/coding agent in the same repo) reads custom
-instructions straight out of the repository - no workflow needed, but it does require a
-Copilot subscription (personal Individual/Pro is fine, not just org/Enterprise) and, unlike
-the option above, means copying a couple of files into the repo.
+on:
+  pull_request:
+    branches: [main]
 
-1. **Repo-wide instructions:** copy [`copilot-instructions.md`](./copilot-instructions.md) to
-   `.github/copilot-instructions.md` in the consuming repo. Fill in the "Project context"
-   section and trim whichever language section(s) don't apply.
-2. **Path-scoped instructions (recommended for multi-language repos):** copy whichever of the
-   following apply into `.github/instructions/`:
-   - [`csharp.instructions.md`](./csharp.instructions.md) - `applyTo: "**/*.cs"`
-   - [`terraform.instructions.md`](./terraform.instructions.md) - `applyTo: "**/*.tf"`
-3. Keep the standards in sync by either:
-   - vendoring this repo's `csharp/`/`terraform-azure/` folders into the consuming repo (e.g.
-     as a git submodule under `standards/`) and referencing individual files from the
-     instructions, or
-   - periodically copying the condensed `REVIEW-CHECKLIST.md` content into the instructions
-     files directly (simplest, but drifts over time - the workflow option above has no such
-     drift problem, since it references the standards live on every run instead).
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  standards:
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+```
+
+Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
+violations fail the check.
+
+To require it before merge, add it as a required status check in your branch protection rules.
+
+## Options
+
+Set under `with:` in the caller file.
+
+| Input | Default | Effect |
+|---|---|---|
+| `standards_ref` | `main` | Branch/tag/SHA of the rules to enforce. Pin to a tag to freeze them. |
+| `fail_on_violation` | `true` | `false` reports findings without failing the check. |
+| `comment_on_pr` | `true` | `false` writes to the job summary only. |
+
+## Whole organisation
+
+- **Workflow template:** put the caller file in your org's public `.github` repo at
+  `workflow-templates/standards-review.yml`. It then shows up as a one-click add under the
+  Actions tab of every repo in the org.
+- **Repo template:** put the caller file in your org's repository template so new repos have
+  it from the start.
+- **Bulk add:** loop over `gh repo list YOUR-ORG` and open a PR adding the file to each repo.
+
+Forcing it on every repo automatically needs GitHub Enterprise (repository rulesets with
+required workflows). The options above are free.
+
+## What gets checked
+
+Deterministic pattern checks in [`/scripts`](../scripts). Findings are **blocking** (fails the
+check) or **advisory** (reported only).
+
+**C#:** `IConfiguration` outside the composition root, magic-string config lookups, `.Result`/
+`.Wait()`, `async void`, `throw ex;`, empty catch, `Console.WriteLine`, interpolated log
+messages, `new HttpClient()`, singleton `DbContext`, interpolated SQL, hardcoded credentials,
+missing `<Nullable>enable</Nullable>` and `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
+
+**Terraform/Azure:** SAS tokens and access keys where RBAC works, client secrets, `Owner`/
+`Contributor` assignments, subscription-scoped assignments, shared key auth, backend access
+keys, `-lock=false`, hardcoded secrets, Key Vault purge protection off, public network access
+on, open NSG rules, TLS below 1.2, `default_action = "Allow"`, `ignore_changes = all`,
+`-auto-approve`, data resources missing `prevent_destroy` or `azurerm_management_lock`.
+
+Judgment-based rules (SOLID, class responsibilities, abstraction quality) stay in the
+checklists for human reviewers.
+
+## Optional: Copilot
+
+If you have a paid Copilot plan, copy [`copilot-instructions.md`](./copilot-instructions.md)
+to `.github/copilot-instructions.md`, and [`csharp.instructions.md`](./csharp.instructions.md)
+and [`terraform.instructions.md`](./terraform.instructions.md) into `.github/instructions/`.
+Copilot's free tier does not include PR review.
