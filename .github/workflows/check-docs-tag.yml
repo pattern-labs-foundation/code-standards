@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -13,29 +17,46 @@ jobs:
           fetch-depth: 0
 
       - name: Verify the pinned tag in the docs
+        id: verify
         run: |
           FILES="README.md agent-instructions/README.md agent-instructions/caller-workflow.yml"
+          : > problems.md
 
           if grep -qE 'standards-review\.yml@main' $FILES; then
-            echo "::error::An example pins @main. Pin a dated tag and leave main to the trailing comment."
-            exit 1
+            echo "- An example pins \`@main\`. Pin a dated tag and leave \`main\` to the trailing comment." >> problems.md
           fi
 
           FOUND=$(grep -hoE 'standards-review\.yml@[0-9]{4}-[0-9]{2}-[0-9]{2}-v[0-9]+' $FILES | sed 's/.*@//' | sort -u)
 
           if [ -z "$FOUND" ]; then
-            echo "::error::No pinned tag found in the setup examples."
-            exit 1
+            echo "- No pinned tag found in the setup examples." >> problems.md
+          elif [ "$(echo "$FOUND" | wc -l)" -ne 1 ]; then
+            echo "- The docs disagree on the pinned tag: $(echo "$FOUND" | sed 's/^/`/; s/$/`/' | tr '\n' ' '). They must all pin the same one." >> problems.md
+          elif ! git rev-parse -q --verify "refs/tags/$FOUND" > /dev/null; then
+            LATEST=$(git tag -l '[0-9]*-v*' | sort -t- -k1,1 -k2,2 -k3,3 -k4,4V | tail -1)
+            echo "- The docs pin \`$FOUND\`, which is not a tag in this repo. The newest tag is \`$LATEST\`." >> problems.md
           fi
 
-          if [ "$(echo "$FOUND" | wc -l)" -ne 1 ]; then
-            echo "::error::Docs disagree on the pinned tag: $(echo $FOUND)"
-            exit 1
+          if [ -s problems.md ]; then
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "failed=false" >> "$GITHUB_OUTPUT"
           fi
 
-          if ! git rev-parse -q --verify "refs/tags/$FOUND" > /dev/null; then
-            echo "::error::Docs pin $FOUND, which is not a tag in this repo."
-            exit 1
-          fi
+      - name: Comment on the pull request
+        if: steps.verify.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "## Documented tag needs updating"
+            echo
+            cat problems.md
+            echo
+            echo "Update the pinned tag in \`README.md\`, \`agent-instructions/README.md\` and \`agent-instructions/caller-workflow.yml\`."
+          } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
 
-          echo "Docs pin $FOUND"
+      - name: Fail
+        if: steps.verify.outputs.failed == 'true'
+        run: exit 1
