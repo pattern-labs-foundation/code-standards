@@ -2,12 +2,19 @@
 applyTo: "**/*.cs,**/*.csproj,**/appsettings*.json"
 ---
 
-# 📐 C# Coding Standards
+> [!IMPORTANT]
+> ## 📐 Source: [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards)
+>
+> This file **is** the standard, not a summary of one.
+>
+> | | |
+> |---|---|
+> | 📦 **Origin** | `agent-instructions/csharp.instructions.md` |
+> | 🔄 **Updates** | Sync from code-standards |
+> | 💡 **Improvements** | Contributions welcome, [open a PR](https://github.com/pattern-labs-foundation/code-standards/pulls) |
+> | 📄 **Licence** | MIT |
 
-> **Source:** [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards) · 📄 MIT licensed
-> **File:** `agent-instructions/csharp.instructions.md`
-> This file is the standard itself, not a summary of one. Re-copy it from the source
-> repository to pick up changes, and raise issues or improvements there.
+# 📐 C# Coding Standards
 
 Apply these when reviewing or writing C# in this repository. Flag violations with the
 reason, not just the rule. Prioritise correctness and security over style. Only flag what

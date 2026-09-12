@@ -30,7 +30,7 @@ Unresolved Copilot comments then block the merge.
 
 ## Notes
 
-Re-copy the files when the standards change here.
+Sync the files when the standards change here.
 
 Reviews draw on the account's Copilot premium request quota. Each push to a PR costs another
 request if **Review new pushes** is on.
