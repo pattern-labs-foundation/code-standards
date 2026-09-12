@@ -12,8 +12,17 @@ when reviewing pull requests and when writing code.
 Fill in the "Project context" section of `copilot-instructions.md` and drop whichever
 language files don't apply.
 
-The `.instructions.md` files are path-scoped through their `applyTo` front matter, so the C#
-rules only fire on `**/*.cs` and the Terraform rules only on `**/*.tf`.
+The `.instructions.md` files are path-scoped through their `applyTo` front matter, so each
+set of rules only fires on the files it applies to:
+
+| File | Scope |
+|---|---|
+| `csharp.instructions.md` | `**/*.cs`, `**/*.csproj`, `**/appsettings*.json` |
+| `terraform.instructions.md` | `**/*.tf`, `**/*.tfvars` |
+
+The project and config file types are in scope because several rules cover them, such as
+`<Nullable>enable</Nullable>` in a `.csproj` and secrets committed to `appsettings.json` or
+`.tfvars`.
 
 ## Turn the review on
 
