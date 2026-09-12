@@ -19,15 +19,16 @@ for f in "$@"; do
 done
 
 emit() {
-    printf '%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" "$5" >> "$FINDINGS"
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" "$5" "${6:-}" >> "$FINDINGS"
 }
 
 check() {
-    local regex="$1" severity="$2" rule="$3" message="$4"
+    local regex="$1" severity="$2" rule="$3" message="$4" fix="${FIX:-}"
+    FIX=""
     shift 5
     [ "$#" -eq 0 ] && return 0
     grep -HnE "$regex" "$@" 2>/dev/null | while IFS=: read -r file line _rest; do
-        emit "$file" "$line" "$severity" "$rule" "$message"
+        emit "$file" "$line" "$severity" "$rule" "$message" "$fix"
     done
 }
 
@@ -37,11 +38,13 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'Blocking on async code (.Result/.Wait()/.GetAwaiter().GetResult()) risks deadlock and thread-pool starvation. Await it instead.' \
         -- "${cs_files[@]}"
 
+    FIX='s/async[[:space:]]+void[[:space:]]+/async Task /'
     check 'async\s+void\s+' \
         BLOCK 'async/no-async-void' \
         'async void cannot be awaited and its exceptions cannot be caught by the caller. Use async Task (event handlers are the only exception).' \
         -- "${cs_files[@]}"
 
+    FIX='s/throw[[:space:]]+(ex|e|exception|error)[[:space:]]*;/throw;/'
     check 'throw\s+(ex|e|exception|error)\s*;' \
         BLOCK 'errors/rethrow-resets-stack' \
         'throw ex; resets the stack trace. Use a bare throw; to rethrow, or wrap the original as an InnerException.' \
