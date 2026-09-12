@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Usage: review-csharp.sh <findings-tsv> [changed-file...]
-# Appends: file <TAB> line <TAB> BLOCK|WARN <TAB> rule <TAB> message
 
 set -uo pipefail
 
@@ -24,10 +22,9 @@ emit() {
     printf '%s\t%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4" "$5" >> "$FINDINGS"
 }
 
-# check <regex> <severity> <rule> <message> -- <file...>
 check() {
     local regex="$1" severity="$2" rule="$3" message="$4"
-    shift 5 # drop the four args plus the "--" separator
+    shift 5
     [ "$#" -eq 0 ] && return 0
     grep -HnE "$regex" "$@" 2>/dev/null | while IFS=: read -r file line _rest; do
         emit "$file" "$line" "$severity" "$rule" "$message"
@@ -35,7 +32,6 @@ check() {
 }
 
 if [ "${#cs_files[@]}" -gt 0 ]; then
-    # async
     check '\.(Result)\s*[;,)]|\.Wait\(\)|\.GetAwaiter\(\)\.GetResult\(\)' \
         BLOCK 'async/no-sync-over-async' \
         'Blocking on async code (.Result/.Wait()/.GetAwaiter().GetResult()) risks deadlock and thread-pool starvation. Await it instead.' \
@@ -46,7 +42,6 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'async void cannot be awaited and its exceptions cannot be caught by the caller. Use async Task (event handlers are the only exception).' \
         -- "${cs_files[@]}"
 
-    # errors
     check 'throw\s+(ex|e|exception|error)\s*;' \
         BLOCK 'errors/rethrow-resets-stack' \
         'throw ex; resets the stack trace. Use a bare throw; to rethrow, or wrap the original as an InnerException.' \
@@ -62,7 +57,6 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'Throw a specific exception type (or a meaningful domain exception) rather than bare Exception.' \
         -- "${cs_files[@]}"
 
-    # logging
     check 'Console\.(WriteLine|Write)\s*\(' \
         WARN 'logging/no-console-writeline' \
         'Use an injected ILogger<T> rather than Console.WriteLine for application logging.' \
@@ -73,19 +67,16 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'String interpolation in a log call destroys structured logging. Use a message template with named placeholders: logger.LogInformation("... {OrderId}", id).' \
         -- "${cs_files[@]}"
 
-    # performance
     check 'new\s+HttpClient\s*\(' \
         BLOCK 'performance/httpclient-factory' \
         'new HttpClient() per call can exhaust sockets under load. Use IHttpClientFactory or a registered typed client.' \
         -- "${cs_files[@]}"
 
-    # di
     check 'AddSingleton<[^>]*DbContext' \
         BLOCK 'di/dbcontext-not-singleton' \
         'DbContext is not thread-safe and must be Scoped, never Singleton.' \
         -- "${cs_files[@]}"
 
-    # security
     check 'FromSqlRaw\s*\(\s*\$?"[^"]*\{' \
         BLOCK 'security/sql-injection' \
         'Interpolated/concatenated SQL is an injection risk. Use FromSqlInterpolated or explicit parameters.' \
@@ -96,7 +87,6 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'Looks like a hardcoded credential. Move it to configuration bound via IOptions<T>, sourced from a secret store.' \
         -- "${cs_files[@]}"
 
-    # config: IConfiguration outside the composition root
     app_files=()
     for f in "${cs_files[@]}"; do
         case "$(basename "$f")" in
@@ -117,7 +107,6 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
     fi
 fi
 
-# nullable: project-level enforcement
 for proj in "${csproj_files[@]:-}"; do
     [ -f "$proj" ] || continue
     if ! grep -qE '<Nullable>\s*enable\s*</Nullable>' "$proj"; then
@@ -130,7 +119,6 @@ for proj in "${csproj_files[@]:-}"; do
     fi
 done
 
-# config: secrets committed in appsettings
 if [ "${#config_files[@]}" -gt 0 ]; then
     check '"[^"]*(Password|Pwd|AccountKey|SharedAccessKey)[^"]*"\s*:\s*"[^"{]{6,}"' \
         BLOCK 'config/secret-in-appsettings' \

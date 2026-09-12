@@ -10,7 +10,4 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1  # or @main for latest
-    # with:
-    #   fail_on_violation: false
-    #   comment_on_pr: false
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1  # or main for latest
