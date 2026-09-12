@@ -22,6 +22,11 @@ jobs:
           FILES="README.md agent-instructions/README.md agent-instructions/caller-workflow.yml"
           : > problems.md
 
+          TODAY=$(date -u +%Y-%m-%d)
+          N=$(git tag -l "${TODAY}-v*" | sed "s/^${TODAY}-v//" | sort -n | tail -1)
+          if [ -z "$N" ]; then N=1; else N=$((N + 1)); fi
+          EXPECTED="${TODAY}-v${N}"
+
           if grep -qE 'standards-review\.yml@main' $FILES; then
             echo "- An example pins \`@main\`. Pin a dated tag and leave \`main\` to the trailing comment." >> problems.md
           fi
@@ -32,9 +37,8 @@ jobs:
             echo "- No pinned tag found in the setup examples." >> problems.md
           elif [ "$(echo "$FOUND" | wc -l)" -ne 1 ]; then
             echo "- The docs disagree on the pinned tag: $(echo "$FOUND" | sed 's/^/`/; s/$/`/' | tr '\n' ' '). They must all pin the same one." >> problems.md
-          elif ! git rev-parse -q --verify "refs/tags/$FOUND" > /dev/null; then
-            LATEST=$(git tag -l '[0-9]*-v*' | sort -t- -k1,1 -k2,2 -k3,3 -k4,4V | tail -1)
-            echo "- The docs pin \`$FOUND\`, which is not a tag in this repo. The newest tag is \`$LATEST\`." >> problems.md
+          elif [ "$FOUND" != "$EXPECTED" ]; then
+            echo "- The docs pin \`$FOUND\`, but merging this creates \`$EXPECTED\`. Update the setup examples to \`$EXPECTED\`." >> problems.md
           fi
 
           if [ -s problems.md ]; then
