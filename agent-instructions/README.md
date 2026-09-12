@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-12-v3  # or main for latest
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-12-v6  # or main for latest
 ```
 
 Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
