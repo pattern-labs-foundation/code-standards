@@ -33,8 +33,9 @@ it's the file meant to be pasted directly into a review agent's prompt or instru
 
 ## Enforcing these rules
 
-Add one workflow file to your repo and every PR is checked against these standards
-automatically. See [`/agent-instructions`](../agent-instructions) for setup.
+Copy the instruction files into your repo and turn on Copilot code review, and every PR is
+reviewed against these standards automatically. See
+[`/agent-instructions`](../agent-instructions) for setup.
 
 ## Philosophy
 
