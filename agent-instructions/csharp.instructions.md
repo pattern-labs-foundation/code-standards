@@ -11,7 +11,7 @@ applyTo: "**/*.cs,**/*.csproj,**/appsettings*.json"
 > |---|---|
 > | 📦 **Origin** | `agent-instructions/csharp.instructions.md` |
 > | 🔄 **Updates** | Sync from the source repository |
-> | 🐛 **Issues / improvements** | Raise them upstream, not here |
+> | 💡 **Improvements** | Contributions welcome, open a PR upstream |
 > | 📄 **Licence** | MIT |
 
 # 📐 C# Coding Standards

@@ -11,7 +11,7 @@ applyTo: "**/*.tf,**/*.tfvars"
 > |---|---|
 > | 📦 **Origin** | `agent-instructions/terraform.instructions.md` |
 > | 🔄 **Updates** | Sync from the source repository |
-> | 🐛 **Issues / improvements** | Raise them upstream, not here |
+> | 💡 **Improvements** | Contributions welcome, open a PR upstream |
 > | 📄 **Licence** | MIT |
 
 # 🔐 Terraform (Azure) Standards
