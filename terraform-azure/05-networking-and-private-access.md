@@ -116,12 +116,29 @@ the codebase.
 A reviewing agent generally cannot tell from Terraform alone whether an App Service, Function
 App, Container App, or similar compute resource's *application code* calls an external
 (non-Azure, third-party) endpoint - that's a runtime behavior of code the agent isn't looking
-at, not something the infrastructure declares. A few things in the Terraform/config are
-suggestive rather than conclusive: app settings/environment variables holding a third-party
-URL or API key (a payment gateway, `SENDGRID_API_KEY`, `STRIPE_*`, a webhook target), an
-existing NSG/firewall rule already allowing broad outbound access, or naming/tags like
-"integration," "webhook," "sync," or "gateway." Treat these as reasons to call the
-recommendation out explicitly in a review, not as a precondition for making it.
+at, not something the infrastructure declares. What the agent *can* mechanically check is the
+resource's own configuration for signals that external calls are likely, and use those to
+call the recommendation out more forcefully when found - without treating their absence as
+proof there's nothing to worry about. Concretely, scan `app_settings`/`site_config`/
+`environment_variables`/similar maps on the resource for:
+
+- A value matching a URL (`https?://...`) whose host is not a first-party Azure domain
+  (`*.azure.com`, `*.windows.net`, `*.database.windows.net`, `*.vault.azure.net`,
+  `*.documents.azure.com`, `*.azurewebsites.net`, `*.azure-api.net`, `*.core.windows.net`, or
+  the org's own internal/private domains) - this is a fairly strong signal of an external
+  dependency.
+- A setting *key* matching a recognizable third-party service naming pattern - a payment
+  gateway, messaging/email provider, CRM, or similar SaaS product name as a prefix (e.g.
+  `STRIPE_*`, `TWILIO_*`, `SENDGRID_*`, `PAYPAL_*`), or a generic `*_API_KEY`/`*_WEBHOOK_URL`/
+  `*_CLIENT_SECRET` suffix where the prefix isn't one of the org's own internal services.
+- An NSG/firewall rule already permitting outbound access broadly (`443` to `Internet`/`*`)
+  is itself an admission the workload is expected to reach the public internet.
+- Naming/tags on the resource like "integration," "webhook," "sync," or "gateway."
+
+Treat a match as a reason to name the specific setting/rule found in the review comment (so
+it's a concrete finding, not a generic nag), but treat the *absence* of a match only as "no
+evidence found," not as "confirmed internal-only" - apply the default in the next paragraph
+either way.
 
 Because detection is unreliable and workloads change over time (an "internal only" app
 commonly grows an external dependency later without anyone updating its network setup), the

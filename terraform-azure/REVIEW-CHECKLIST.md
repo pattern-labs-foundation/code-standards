@@ -49,9 +49,12 @@ See [05-networking-and-private-access.md](./05-networking-and-private-access.md)
 - [ ] App Service/Function App/Container App compute has VNet integration
       (`virtual_network_subnet_id` or equivalent) with `vnet_route_all_enabled` - recommend
       this by default rather than only when the app is confirmed to call external endpoints,
-      since that generally isn't visible from Terraform alone. Treat app settings referencing
-      a third-party URL/API key with no VNet integration as a stronger-than-usual signal to
-      raise it.
+      since that generally isn't visible from Terraform alone. Scan `app_settings`/
+      `environment_variables` for a non-Azure URL, a recognizable third-party service naming
+      pattern (`STRIPE_*`, `*_API_KEY`, `*_WEBHOOK_URL`, etc.), or an already-permissive
+      outbound NSG rule, and name the specific one found when it's missing VNet integration -
+      but still recommend VNet integration even with no such match, since its absence doesn't
+      confirm the app is internal-only.
 
 ## Resource Protection
 See [08-resource-protection-and-lifecycle.md](./08-resource-protection-and-lifecycle.md)

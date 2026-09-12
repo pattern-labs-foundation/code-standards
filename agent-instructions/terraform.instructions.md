@@ -47,8 +47,10 @@ Full detail and rationale: https://github.com/<org>/code-standards/tree/main/ter
 - App Service/Function App/Container App compute has VNet integration
   (`virtual_network_subnet_id`, `vnet_route_all_enabled`) by default - don't wait to confirm
   the app calls an external endpoint before recommending it, since that usually isn't visible
-  from Terraform alone; app settings referencing a third-party URL/API key with no VNet
-  integration is a stronger-than-usual signal to raise it.
+  from Terraform alone. Scan `app_settings`/`environment_variables` for a non-Azure URL, a
+  third-party service naming pattern (`STRIPE_*`, `*_API_KEY`, `*_WEBHOOK_URL`, etc.), or an
+  already-permissive outbound NSG rule, and name the specific one found if VNet integration
+  is missing - but recommend it regardless, since no match doesn't confirm internal-only.
 
 ## Resource protection
 - `lifecycle { prevent_destroy = true }` on production databases/storage/Key Vaults.
