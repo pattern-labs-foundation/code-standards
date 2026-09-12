@@ -1,0 +1,51 @@
+# Copy to `.github/workflows/pr-review.yml` in the consuming repository.
+#
+# This is an example of running a custom LLM-based review agent on a GitHub-hosted runner,
+# for teams that want more control than Copilot's built-in PR review offers (a different
+# model/provider, a fully custom prompt, posting as a specific bot account, gating on labels,
+# etc). If the team is happy with GitHub Copilot's native PR review reading
+# `.github/copilot-instructions.md`, this workflow is not needed at all - see
+# `copilot-instructions.md`, `csharp.instructions.md`, and `terraform.instructions.md` in
+# this folder instead.
+#
+# The "Run standards-based review" step below is a placeholder - replace it with whichever
+# review agent/action/CLI your organization already runs on its runners. The important part
+# of this workflow is the two checkouts (the PR's code and this standards repo) so that
+# whatever agent you plug in has both the diff and the checklists in front of it.
+
+name: PR Review Against Standards
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout code-standards
+        uses: actions/checkout@v4
+        with:
+          repository: <org>/code-standards
+          path: .code-standards
+          ref: main
+
+      - name: Run standards-based review
+        # Replace this step with your organization's review agent/action of choice.
+        # Point its prompt/config at:
+        #   .code-standards/csharp/REVIEW-CHECKLIST.md            (for C# changes)
+        #   .code-standards/terraform-azure/REVIEW-CHECKLIST.md   (for Terraform/Azure changes)
+        # and have it post findings back to the PR as a review comment, most severe first.
+        # For Terraform, treat any static access key/SAS token/connection string used where
+        # RBAC or managed identity was available instead as a high-priority finding.
+        run: |
+          echo "Wire up your review agent here, pointed at .code-standards/"
