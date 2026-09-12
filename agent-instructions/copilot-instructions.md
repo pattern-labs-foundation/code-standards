@@ -1,17 +1,10 @@
-<!--
-  Copy this file to `.github/copilot-instructions.md` in the consuming repository.
-  GitHub Copilot (Chat, PR code review, and the coding agent) reads this file automatically
-  for repo-wide custom instructions - no workflow file needed.
+# 📐 Repository Custom Instructions
 
-  This is a starting point. Trim sections that don't apply, and replace the "Project context"
-  section with details specific to the repo it's copied into. Language/topic-specific detail
-  lives in the path-scoped instructions files under `.github/instructions/` (copy
-  `csharp.instructions.md` and/or `terraform.instructions.md` from this same
-  agent-instructions folder alongside this file) so this file stays a short, cross-cutting
-  summary rather than duplicating everything.
--->
-
-# Repository Custom Instructions
+> **Source:** [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards) · 📄 MIT licensed
+> **File:** `agent-instructions/copilot-instructions.md`
+> Copy to `.github/copilot-instructions.md`. Fill in "Project context" and drop the sections
+> that don't apply. Language detail lives in the path-scoped files under
+> `.github/instructions/`, so keep this one cross-cutting.
 
 ## Project context
 
