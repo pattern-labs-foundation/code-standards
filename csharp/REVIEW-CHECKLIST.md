@@ -111,7 +111,9 @@ See [11-testing.md](./11-testing.md)
 
 ## Nullable Reference Types
 See [12-nullable-reference-types.md](./12-nullable-reference-types.md)
-- [ ] `<Nullable>enable</Nullable>` present for new projects.
+- [ ] `<Nullable>enable</Nullable>` present for new projects, paired with
+      `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` once the project has no legacy
+      warning backlog - otherwise nullable warnings can be silently ignored.
 - [ ] Null-forgiving operator (`!`) used sparingly and only with a justifying comment.
 - [ ] Collection-returning methods return an empty collection, never `null`.
 

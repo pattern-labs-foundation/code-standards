@@ -1,19 +1,46 @@
 # Nullable Reference Types
 
-## 1. Enable nullable reference types project-wide
+## 1. Enable nullable reference types project-wide, and make violations build errors
+
+`<Nullable>enable</Nullable>` alone only turns nullable-flow analysis into *warnings* - the
+build still succeeds if a warning is ignored, so nothing actually forces anyone to handle a
+possible null. To make it enforced rather than advisory, also turn on
+`TreatWarningsAsErrors`:
 
 ```xml
 <PropertyGroup>
   <Nullable>enable</Nullable>
+  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 </PropertyGroup>
 ```
 
-New projects should have this on from the start. Existing projects migrating should enable it
-incrementally per-file (`#nullable enable` at the top of a file) rather than leaving it off
-indefinitely.
+New projects should have both settings on from the start. Existing projects migrating should
+enable `<Nullable>enable</Nullable>` incrementally per-file (`#nullable enable` at the top of
+a file) first, and only turn on `TreatWarningsAsErrors` once the codebase is actually clean of
+warnings, rather than leaving nullable off indefinitely or flipping this switch before the
+existing warning backlog is addressed. If a specific warning needs a temporary exception
+while that cleanup is in progress, suppress it explicitly and narrowly (a `#pragma warning
+disable` around the specific line, or a `<NoWarn>` entry for a specific code) rather than
+leaving `TreatWarningsAsErrors` off for the whole project indefinitely.
+
+```xml
+<!-- Bad - analysis is on, but nothing stops a warning from being ignored -->
+<PropertyGroup>
+  <Nullable>enable</Nullable>
+</PropertyGroup>
+
+<!-- Good - a possible null that isn't handled fails the build -->
+<PropertyGroup>
+  <Nullable>enable</Nullable>
+  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+</PropertyGroup>
+```
 
 **Flag:** a `.csproj` with `<Nullable>disable</Nullable>` (or missing entirely) for a project
-started recently with no migration plan noted.
+started recently with no migration plan noted; `<Nullable>enable</Nullable>` present with no
+corresponding `TreatWarningsAsErrors` (or equivalent `.editorconfig` severity escalation on
+the nullable warning codes) once the project has no legacy warning backlog left to migrate
+through.
 
 ## 2. Avoid the null-forgiving operator (`!`) without justification
 

@@ -69,6 +69,14 @@ Full detail and rationale: https://github.com/<org>/code-standards/tree/main/csh
 - New/changed logic has tests covering edge cases and failure paths, not only the happy path.
 - Unit tests fake/mock dependencies rather than hitting real infrastructure.
 
+## Nullable reference types
+- `<Nullable>enable</Nullable>` on for new projects, paired with
+  `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` once the project has no legacy warning
+  backlog - otherwise a possible null is only a warning and the build still succeeds.
+- Null-forgiving operator (`!`) used sparingly and only with a comment justifying why the
+  invariant actually holds.
+- Collection-returning methods return an empty collection, never `null`.
+
 ## Style
 - `PascalCase` public members, `_camelCase` private fields, one public type per file.
 - Defer to this repo's `.editorconfig` where it's more specific than this list.
