@@ -33,7 +33,7 @@ it's the file meant to be pasted directly into a review agent's prompt or instru
 
 ## How to use this with a review agent
 
-See [`/templates`](../templates) for ready-to-copy files:
+See [`/agent-instructions`](../agent-instructions) for ready-to-copy files:
 
 - `copilot-instructions.md` - drop into `.github/copilot-instructions.md`
 - `csharp.instructions.md` - path-scoped Copilot instructions for `**/*.cs`

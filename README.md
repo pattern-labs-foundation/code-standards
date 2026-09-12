@@ -25,7 +25,7 @@ Currently covers:
   [`terraform-azure/REVIEW-CHECKLIST.md`](./terraform-azure/REVIEW-CHECKLIST.md). The
   through-line: prefer Azure RBAC and managed identity/OIDC over static access keys, SAS
   tokens, connection strings, and service principal secrets wherever both are available.
-- [`templates/`](./templates) - ready-to-copy files for wiring these standards into a
+- [`agent-instructions/`](./agent-instructions) - ready-to-copy files for wiring these standards into a
   consuming repo's PR review process (`.github/copilot-instructions.md`, path-scoped Copilot
   instructions for both C# and Terraform, and a GitHub Actions workflow for a custom review
   agent).
@@ -41,13 +41,13 @@ more than one.
 This is the lowest-effort path if your repo already uses GitHub Copilot.
 
 1. In the repo you want to protect, create `.github/copilot-instructions.md` using
-   [`templates/copilot-instructions.md`](./templates/copilot-instructions.md) as your
+   [`agent-instructions/copilot-instructions.md`](./agent-instructions/copilot-instructions.md) as your
    starting point. Fill in the "Project context" section for that specific repo.
 2. Add whichever path-scoped instructions files apply, so rules for one stack don't leak
    into reviews of another in a multi-language/multi-stack repo:
-   - [`templates/csharp.instructions.md`](./templates/csharp.instructions.md) ->
+   - [`agent-instructions/csharp.instructions.md`](./agent-instructions/csharp.instructions.md) ->
      `.github/instructions/csharp.instructions.md` (`applyTo: "**/*.cs"`)
-   - [`templates/terraform.instructions.md`](./templates/terraform.instructions.md) ->
+   - [`agent-instructions/terraform.instructions.md`](./agent-instructions/terraform.instructions.md) ->
      `.github/instructions/terraform.instructions.md` (`applyTo: "**/*.tf"`)
 3. Commit the files to the repo's default branch.
 4. Confirm Copilot code review is turned on for the repo (repo Settings -> Copilot, or your
@@ -65,7 +65,7 @@ existing repo via a script/Actions workflow that runs once across the org.
 Use this if you want a specific model/provider, a fully custom prompt, or want the review to
 run as a distinct bot account rather than relying on Copilot's built-in review.
 
-1. Copy [`templates/pr-review-agent-workflow.yml`](./templates/pr-review-agent-workflow.yml)
+1. Copy [`agent-instructions/pr-review-agent-workflow.yml`](./agent-instructions/pr-review-agent-workflow.yml)
    to `.github/workflows/pr-review.yml` in the target repo.
 2. Replace `<org>/code-standards` with wherever this repo actually lives (this repo itself,
    or your own fork of it if you've customized the rules).
@@ -83,7 +83,7 @@ time. Two ways to manage that:
 
 - **Link out** (simplest): keep the instructions files short, and have them reference the
   live URL of this repo's `csharp/`/`terraform-azure/` folders for full detail, as the
-  templates already do.
+  agent-instructions files already do.
 - **Vendor a copy** (more control, more upkeep): add this repo as a git submodule (e.g. at
   `standards/csharp`) or copy the relevant folder in directly, and point your instructions
   files at the local copy. Update it deliberately when you pull in changes, rather than
@@ -94,8 +94,8 @@ time. Two ways to manage that:
 1. Pick the topic set you need: [`csharp/`](./csharp) or [`terraform-azure/`](./terraform-azure).
 2. Read that folder's `README.md` for the index, or jump straight to its
    `REVIEW-CHECKLIST.md` for the agent-facing summary.
-3. Use [`templates/`](./templates) to wire it into your repo's PR review flow, per the
-   implementation steps above - see also [`templates/README.md`](./templates/README.md).
+3. Use [`agent-instructions/`](./agent-instructions) to wire it into your repo's PR review flow, per the
+   implementation steps above - see also [`agent-instructions/README.md`](./agent-instructions/README.md).
 
 ## Contributing
 

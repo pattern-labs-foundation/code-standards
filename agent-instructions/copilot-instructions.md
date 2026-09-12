@@ -6,9 +6,9 @@
   This is a starting point. Trim sections that don't apply, and replace the "Project context"
   section with details specific to the repo it's copied into. Language/topic-specific detail
   lives in the path-scoped instructions files under `.github/instructions/` (copy
-  `csharp.instructions.md` and/or `terraform.instructions.md` from this same templates
-  folder alongside this file) so this file stays a short, cross-cutting summary rather than
-  duplicating everything.
+  `csharp.instructions.md` and/or `terraform.instructions.md` from this same
+  agent-instructions folder alongside this file) so this file stays a short, cross-cutting
+  summary rather than duplicating everything.
 -->
 
 # Repository Custom Instructions
@@ -40,14 +40,14 @@ preferences. Only flag what's actually visible in the diff.
 
 ### C# (`**/*.cs`)
 See `.github/instructions/csharp.instructions.md` (copied from
-`code-standards/templates/csharp.instructions.md`) for the full checklist: the Options
+`code-standards/agent-instructions/csharp.instructions.md`) for the full checklist: the Options
 pattern over raw `IConfiguration`, constructor injection and DI lifetime correctness, no
 blocking on async code, structured logging, EF Core query hygiene, DTOs at API boundaries,
 parameterized queries.
 
 ### Terraform / Azure (`**/*.tf`)
 See `.github/instructions/terraform.instructions.md` (copied from
-`code-standards/templates/terraform.instructions.md`) for the full checklist: RBAC/managed
+`code-standards/agent-instructions/terraform.instructions.md`) for the full checklist: RBAC/managed
 identity over storage keys and SAS tokens, remote state with Azure AD-based backend auth, no
 secrets in `.tf`/`.tfvars`, no public network access or `0.0.0.0/0` NSG rules by default,
 `prevent_destroy` on stateful resources, plan review gated before apply.

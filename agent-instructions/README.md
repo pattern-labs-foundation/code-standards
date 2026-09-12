@@ -1,4 +1,4 @@
-# Integration Templates
+# Agent Instructions
 
 Copy-paste starting points for wiring standards from [`/csharp`](../csharp) and
 [`/terraform-azure`](../terraform-azure) into a consuming repository's PR review process.
