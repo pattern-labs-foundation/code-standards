@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.cs"
+applyTo: "**/*.cs,**/*.csproj,**/appsettings*.json"
 ---
 <!--
   Copy this file to `.github/instructions/csharp.instructions.md` in the consuming repository.

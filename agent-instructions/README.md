@@ -34,6 +34,15 @@ Copilot comments do not block a merge on their own. To require them to be dealt 
 
 Unresolved Copilot comments then block the merge.
 
+## Migrating from the reusable workflow
+
+Earlier versions shipped a reusable workflow that repos called with
+`uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`.
+That workflow has been removed, so any repo still calling it will fail with a
+"workflow not found" error.
+
+To migrate, delete that caller workflow from your repo and follow the setup above instead.
+
 ## Keeping up to date
 
 Re-copy the files when the standards here change. They are condensed checklists that change
