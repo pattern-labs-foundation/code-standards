@@ -5,13 +5,13 @@ applyTo: "**/*.tf,**/*.tfvars"
 > [!IMPORTANT]
 > ## 🔐 Source: [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards)
 >
-> **This file is maintained upstream.** It is the standard itself, not a summary of one.
+> This file **is** the standard, not a summary of one.
 >
 > | | |
 > |---|---|
 > | 📦 **Origin** | `agent-instructions/terraform.instructions.md` |
-> | 🔄 **Updates** | Sync from the source repository |
-> | 💡 **Improvements** | Contributions welcome, open a PR upstream |
+> | 🔄 **Updates** | Sync from code-standards |
+> | 💡 **Improvements** | Contributions welcome, [open a PR](https://github.com/pattern-labs-foundation/code-standards/pulls) |
 > | 📄 **Licence** | MIT |
 
 # 🔐 Terraform (Azure) Standards

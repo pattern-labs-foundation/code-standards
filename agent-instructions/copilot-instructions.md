@@ -1,15 +1,15 @@
 > [!IMPORTANT]
 > ## 📐 Source: [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards)
 >
-> **Based on an upstream template.** Fill in "Project context" and drop what doesn't apply.
+> A starting template. Fill in "Project context" and drop what does not apply.
 > Language detail belongs in the path-scoped files under `.github/instructions/`, so keep
 > this one cross-cutting.
 >
 > | | |
 > |---|---|
 > | 📦 **Origin** | `agent-instructions/copilot-instructions.md` |
-> | 🔄 **Updates** | Sync from the source repository |
-> | 💡 **Improvements** | Contributions welcome, open a PR upstream |
+> | 🔄 **Updates** | Sync from code-standards |
+> | 💡 **Improvements** | Contributions welcome, [open a PR](https://github.com/pattern-labs-foundation/code-standards/pulls) |
 > | 📄 **Licence** | MIT |
 
 # 📐 Repository Custom Instructions
