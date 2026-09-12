@@ -1,73 +1,63 @@
 # code-standards
 
-Coding standards for C# and Terraform/Azure, enforced automatically on pull requests.
+Coding standards for C# and Terraform on Azure, written so an AI reviewer can apply them to
+pull requests.
 
-Add one file to your repo and every PR gets checked against these rules. Works on any repo
-including free personal accounts. No API key, no Copilot, no paid anything.
+Copy the instruction files into your repo, turn on Copilot code review, and every PR gets
+reviewed against these rules with inline comments where code breaks them.
 
-MIT licensed. Anyone is welcome to use, fork, or point their repos at it.
+MIT licensed. Anyone is welcome to use, fork, or adapt it.
+
+> **Already calling the reusable workflow?** It has been removed. A repo whose workflow still
+> has `uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`
+> will fail with "workflow not found". Delete that workflow file and follow the quick start
+> below instead. Details in [`agent-instructions/`](./agent-instructions#migrating-from-the-reusable-workflow).
 
 ## Quick start
 
-Copy [`agent-instructions/caller-workflow.yml`](./agent-instructions/caller-workflow.yml) to
-`.github/workflows/standards-review.yml` in your repo:
+**1. Copy three files** from [`agent-instructions/`](./agent-instructions) into your repo:
 
-```yaml
-name: Standards Review
+| Copy this | To here |
+|---|---|
+| `copilot-instructions.md` | `.github/copilot-instructions.md` |
+| `csharp.instructions.md` | `.github/instructions/csharp.instructions.md` |
+| `terraform.instructions.md` | `.github/instructions/terraform.instructions.md` |
 
-on:
-  pull_request:
-    branches: [main]
+**2. Turn Copilot code review on in your repo.** Copying the files does nothing on its own.
 
-permissions:
-  contents: read
-  pull-requests: write
+**Settings → Copilot → Code review →** tick **Automatically request Copilot code review**.
 
-jobs:
-  standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-12-v7  # or main for latest
-```
+That's it. Open a PR and Copilot reviews it against these standards.
 
-That is the whole setup. The rules stay in this repo, so you get updates without re-copying
-anything.
-
-### Which version to use
-
-Every merge into main is tagged, so you can pin any point in time. The tag
-is the merge date plus a counter, so a second merge the same day ends `-v2`. Pick one from
-[the tags page](https://github.com/pattern-labs-foundation/code-standards/tags).
-
-| Ref | Behaviour | Use when |
-|---|---|---|
-| A dated tag | Frozen. Never changes. | Preferred. You control exactly when rules change |
-| `main` | Latest rules. New rules can start failing your build. | You always want the newest |
-
-Full setup docs, options, and org-wide rollout: [`agent-instructions/`](./agent-instructions).
+To make findings block a merge, and for the rest of the setup, see
+[`agent-instructions/`](./agent-instructions).
 
 ## The standards
 
 | | |
 |---|---|
 | [`csharp/`](./csharp) | Architecture, DI, the Options pattern, async, error handling, logging, API design, EF Core, security, performance, testing, nullable reference types, style, immutability, disposal |
-| [`terraform-azure/`](./terraform-azure) | State, auth/identity, RBAC, secrets and Key Vault, networking, modules, naming/tagging, resource protection, logging, CI/CD, style, policy scanning |
+| [`terraform-azure/`](./terraform-azure) | State, auth and identity, RBAC, secrets and Key Vault, networking, modules, naming and tagging, resource protection, logging, CI/CD, style, policy scanning |
 
 Each folder has numbered topic files with rationale and `Bad`/`Good` examples, plus a
-`REVIEW-CHECKLIST.md` condensing them into a reviewer-facing list.
+`REVIEW-CHECKLIST.md` condensing them into a reviewer-facing list. The instruction files are
+the condensed version of those checklists.
 
 The Terraform rules centre on one theme: prefer Azure RBAC and managed identity over static
 access keys, SAS tokens, connection strings, and service principal secrets.
 
-## How it works
+## Why instructions rather than a linter
 
-The workflow lives in [`.github/workflows/standards-review.yml`](./.github/workflows/standards-review.yml)
-and runs the checks in [`scripts/`](./scripts) against the files changed in a PR. Findings are
-posted as a PR comment and job summary; blocking findings fail the check.
+These rules need judgment. Whether a class has too many responsibilities, whether an
+abstraction earns its place, whether a config value belongs in an options class, none of that
+is reliably decidable by pattern matching. A reviewer that reads the code does a better job
+than regex, and there is nothing to maintain.
 
-Checks are deterministic pattern matches, so they run on the free GitHub-hosted runner with no
-external service. Judgment-based rules stay in the checklists for human reviewers.
+Rules that are purely mechanical can still be enforced the usual ways: analyzers and
+`.editorconfig` for C#, `tfsec` or `checkov` for Terraform.
 
 ## Contributing
 
-PRs welcome. New standards need a short rationale, a `Bad`/`Good` example, and a "flag when"
-condition. If a rule can be checked mechanically, add it to the relevant script in
-[`scripts/`](./scripts).
+Pull requests welcome. New standards need a short rationale, a `Bad`/`Good` example, and a
+"flag when" condition so a reviewer can act on it directly. Update the matching
+`REVIEW-CHECKLIST.md` and the relevant file in `agent-instructions/` in the same change.

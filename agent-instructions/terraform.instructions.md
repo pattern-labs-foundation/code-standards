@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.tf"
+applyTo: "**/*.tf,**/*.tfvars"
 ---
 <!--
   Copy this file to `.github/instructions/terraform.instructions.md` in the consuming

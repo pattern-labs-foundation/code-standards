@@ -1,93 +1,64 @@
 # Setup
 
-Add one file to your repo. It calls the workflow in this repo, so the rules stay here and you
-get updates automatically.
+Copy these into your repo. GitHub Copilot reads them automatically and applies the standards
+when reviewing pull requests and when writing code.
 
-Works on any repo including free personal accounts. No API key, no Copilot, no paid anything.
+| Copy this | To here |
+|---|---|
+| [`copilot-instructions.md`](./copilot-instructions.md) | `.github/copilot-instructions.md` |
+| [`csharp.instructions.md`](./csharp.instructions.md) | `.github/instructions/csharp.instructions.md` |
+| [`terraform.instructions.md`](./terraform.instructions.md) | `.github/instructions/terraform.instructions.md` |
 
-## Single repo
+Fill in the "Project context" section of `copilot-instructions.md` and drop whichever
+language files don't apply.
 
-Copy [`caller-workflow.yml`](./caller-workflow.yml) to `.github/workflows/standards-review.yml`:
+The `.instructions.md` files are path-scoped through their `applyTo` front matter, so each
+set of rules only fires on the files it applies to:
 
-```yaml
-name: Standards Review
+| File | Scope |
+|---|---|
+| `csharp.instructions.md` | `**/*.cs`, `**/*.csproj`, `**/appsettings*.json` |
+| `terraform.instructions.md` | `**/*.tf`, `**/*.tfvars` |
 
-on:
-  pull_request:
-    branches: [main]
+The project and config file types are in scope because several rules cover them, such as
+`<Nullable>enable</Nullable>` in a `.csproj` and secrets committed to `appsettings.json` or
+`.tfvars`.
 
-permissions:
-  contents: read
-  pull-requests: write
+## Turn the review on
 
-jobs:
-  standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-12-v7  # or main for latest
-```
+**Settings → Copilot → Code review →** tick **Automatically request Copilot code review**.
 
-Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
-violations fail the check.
+Copilot then reviews every new pull request against these standards and leaves inline
+comments on the lines where it finds problems.
 
-To require it before merge, add it as a required status check in your branch protection rules.
+## Make it block merges
 
-## Options
+Copilot comments do not block a merge on their own. To require them to be dealt with:
 
-Set under `with:` in the caller file.
+**Settings → Rules → Rulesets →** your ruleset for `main`
 
-| Input | Default | Effect |
-|---|---|---|
-| `standards_ref` | matches the version you called | Override which branch/tag/SHA of the rules to enforce. |
-| `fail_on_violation` | `true` | `false` reports findings without failing the check. |
-| `comment_on_pr` | `true` | `false` writes to the job summary only. |
+- Set **Enforcement status** to **Active**, or none of the rules apply
+- Tick **Require a pull request before merging**
+- Tick **Require conversation resolution before merging**
 
-## Which version to use
+Unresolved Copilot comments then block the merge.
 
-Every merge into main is tagged, so you can pin any point in time. The tag
-is the merge date plus a counter, so a second merge the same day ends `-v2`. Pick one from
-[the tags page](https://github.com/pattern-labs-foundation/code-standards/tags).
+## Migrating from the reusable workflow
 
-| Ref | Behaviour | Use when |
-|---|---|---|
-| A dated tag | Frozen. Never changes. | Preferred. You control exactly when rules change |
-| `main` | Latest rules. New rules can start failing your build. | You always want the newest |
+Earlier versions shipped a reusable workflow that repos called with
+`uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`.
+That workflow has been removed, so any repo still calling it will fail with a
+"workflow not found" error.
 
-Pinning is preferred, so a new rule cannot fail your build unannounced. Bump
-it when you are ready to fix what it finds.
+To migrate, delete that caller workflow from your repo and follow the setup above instead.
 
-## Whole organisation
+## Keeping up to date
 
-- **Workflow template:** put the caller file in your org's public `.github` repo at
-  `workflow-templates/standards-review.yml`. It then shows up as a one-click add under the
-  Actions tab of every repo in the org.
-- **Repo template:** put the caller file in your org's repository template so new repos have
-  it from the start.
-- **Bulk add:** loop over `gh repo list YOUR-ORG` and open a PR adding the file to each repo.
+Re-copy the files when the standards here change. They are condensed checklists that change
+rarely, so this is occasional rather than ongoing.
 
-Forcing it on every repo automatically needs GitHub Enterprise (repository rulesets with
-required workflows). The options above are free.
+## Cost
 
-## What gets checked
-
-Deterministic pattern checks in [`/scripts`](../scripts). Findings are **blocking** (fails the
-check) or **advisory** (reported only).
-
-**C#:** `IConfiguration` outside the composition root, magic-string config lookups, `.Result`/
-`.Wait()`, `async void`, `throw ex;`, empty catch, `Console.WriteLine`, interpolated log
-messages, `new HttpClient()`, singleton `DbContext`, interpolated SQL, hardcoded credentials,
-missing `<Nullable>enable</Nullable>` and `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
-
-**Terraform/Azure:** SAS tokens and access keys where RBAC works, client secrets, `Owner`/
-`Contributor` assignments, subscription-scoped assignments, shared key auth, backend access
-keys, `-lock=false`, hardcoded secrets, Key Vault purge protection off, public network access
-on, open NSG rules, TLS below 1.2, `default_action = "Allow"`, `ignore_changes = all`,
-`-auto-approve`, data resources missing `prevent_destroy` or `azurerm_management_lock`.
-
-Judgment-based rules (SOLID, class responsibilities, abstraction quality) stay in the
-checklists for human reviewers.
-
-## Optional: Copilot
-
-If you have a paid Copilot plan, copy [`copilot-instructions.md`](./copilot-instructions.md)
-to `.github/copilot-instructions.md`, and [`csharp.instructions.md`](./csharp.instructions.md)
-and [`terraform.instructions.md`](./terraform.instructions.md) into `.github/instructions/`.
-Copilot's free tier does not include PR review.
+Copilot code review draws on the account's premium request quota, including the free tier's
+monthly allowance. Each push to a PR consumes another request if **Review new pushes** is on,
+so turn that off if you hit the cap.

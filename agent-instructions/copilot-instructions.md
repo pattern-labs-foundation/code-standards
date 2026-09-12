@@ -38,14 +38,14 @@ preferences. Only flag what's actually visible in the diff.
 - Flag new logic/infrastructure with no corresponding tests, or tests/checks covering only
   the happy path.
 
-### C# (`**/*.cs`)
+### C# (`**/*.cs`, `**/*.csproj`, `**/appsettings*.json`)
 See `.github/instructions/csharp.instructions.md` (copied from
 `code-standards/agent-instructions/csharp.instructions.md`) for the full checklist: the Options
 pattern over raw `IConfiguration`, constructor injection and DI lifetime correctness, no
 blocking on async code, structured logging, EF Core query hygiene, DTOs at API boundaries,
 parameterized queries.
 
-### Terraform / Azure (`**/*.tf`)
+### Terraform / Azure (`**/*.tf`, `**/*.tfvars`)
 See `.github/instructions/terraform.instructions.md` (copied from
 `code-standards/agent-instructions/terraform.instructions.md`) for the full checklist: RBAC/managed
 identity over storage keys and SAS tokens, remote state with Azure AD-based backend auth, no

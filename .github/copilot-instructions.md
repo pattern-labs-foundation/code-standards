@@ -1,33 +1,26 @@
 # Repository Custom Instructions
 
-This repo holds coding standards that other repos enforce by calling
-`.github/workflows/standards-review.yml` as a reusable workflow.
+This repo holds coding standards that other repos adopt by copying the files in
+`agent-instructions/` into their own `.github/` directory.
 
 ## When reviewing pull requests
 
-**Check the documented tag is current.** Every merge into main creates a dated tag
-(`YYYY-MM-DD-vN`, incrementing the suffix for repeat merges the same day). The docs show a
-pinned tag in their setup examples, and it must match the tag this merge will create.
+**Keep the three layers in sync.** A standard exists in three places, and a change to one
+usually needs the others:
 
-Check these three files:
+- `csharp/NN-*.md` or `terraform-azure/NN-*.md` is the full rule with rationale and examples
+- the matching `REVIEW-CHECKLIST.md` is the condensed reviewer-facing version
+- `agent-instructions/csharp.instructions.md` or `terraform.instructions.md` is what
+  consumers actually copy
 
-- `README.md`
-- `agent-instructions/README.md`
-- `agent-instructions/caller-workflow.yml`
-
-Flag the PR if:
-
-- The tag in any of them is not today's date, since merging creates a tag dated today.
-- The three files disagree with each other.
-- A tag reference was changed in one file but not the others.
-- Any example shows `@main` as the value rather than a pinned tag. `main` belongs only in the
-  trailing `# or main for latest` comment, never as the thing people copy.
+Flag a PR that adds or changes a rule in one of these without updating the others.
 
 **Other things to flag:**
 
-- Comments added to YAML or shell files. These stay comment-free; documentation belongs in
+- Comments added to YAML or shell files. These stay comment-free, documentation belongs in
   the README.
 - Em dashes anywhere. Use a plain hyphen, comma, or colon.
-- A new rule added to `csharp/` or `terraform-azure/` with no matching check in `scripts/`,
-  where the rule is mechanically checkable.
-- A check added to `scripts/` that no standards file documents.
+- A standard phrased so a reviewer cannot act on it. Each needs a rationale, a `Bad`/`Good`
+  example, and a clear "flag when" condition.
+- Setup instructions that tell people to copy the instruction files without also telling them
+  to enable Copilot code review, since copying alone does nothing.
