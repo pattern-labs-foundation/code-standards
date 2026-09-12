@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1  # or main for latest
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-12-v3  # or main for latest
 ```
 
 Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
@@ -42,8 +42,8 @@ Set under `with:` in the caller file.
 
 ## Which version to use
 
-Every merge into main is tagged with the date, so you can pin any point in time. Tags look
-like `2026-09-13-v1`, and a second merge the same day is `2026-09-13-v2`. Pick one from
+Every merge into main is tagged, so you can pin any point in time. The tag
+is the merge date plus a counter, so a second merge the same day ends `-v2`. Pick one from
 [the tags page](https://github.com/pattern-labs-foundation/code-standards/tags).
 
 | Ref | Behaviour | Use when |
