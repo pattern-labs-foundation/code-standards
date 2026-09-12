@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1
 ```
 
 Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
@@ -40,18 +40,18 @@ Set under `with:` in the caller file.
 | `fail_on_violation` | `true` | `false` reports findings without failing the check. |
 | `comment_on_pr` | `true` | `false` writes to the job summary only. |
 
-## Pinning
+## Which version to use
 
 Every merge into main is tagged automatically, so you can reference any point in time.
 
-```yaml
-uses: ...standards-review.yml@main     # always the latest rules
-uses: ...standards-review.yml@v1       # latest v1.x, moves as rules are added
-uses: ...standards-review.yml@v1.0.3   # frozen, never changes
-```
+| Ref | Behaviour | Use when |
+|---|---|---|
+| `@v1` | Latest rules within v1. New rules can start failing your build. | Recommended default |
+| `@v1.0.3` | Frozen. Never changes. | You want to control exactly when rules change |
+| `@main` | Bleeding edge, including unreleased changes. | Trying things out |
 
-Pin to `@v1.0.3` if you don't want new rules failing your builds until you're ready, then
-bump when you are.
+Pin to an exact version if a new rule failing your build unannounced would be a problem, then
+bump the tag when you are ready to fix what it finds.
 
 ## Whole organisation
 

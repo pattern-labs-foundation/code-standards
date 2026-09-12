@@ -25,11 +25,21 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1
 ```
 
 That is the whole setup. The rules stay in this repo, so you get updates without re-copying
 anything.
+
+### Which version to use
+
+Every merge into main is tagged automatically, so you can reference any point in time.
+
+| Ref | Behaviour | Use when |
+|---|---|---|
+| `@v1` | Latest rules within v1. New rules can start failing your build. | Recommended default |
+| `@v1.0.3` | Frozen. Never changes. | You want to control exactly when rules change |
+| `@main` | Bleeding edge, including unreleased changes. | Trying things out |
 
 Full setup docs, options, and org-wide rollout: [`agent-instructions/`](./agent-instructions).
 
