@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1  # or main for latest
 ```
 
 Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
@@ -42,18 +42,14 @@ Set under `with:` in the caller file.
 
 ## Which version to use
 
-Every merge into main is tagged with the date, so you can pin any point in time. Pick one
-from [the tags page](https://github.com/pattern-labs-foundation/code-standards/tags).
-Tags look like `2026-09-13-v1`, and a second merge the same day is `2026-09-13-v2`.
-
-```yaml
-uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1
-```
+Every merge into main is tagged with the date, so you can pin any point in time. Tags look
+like `2026-09-13-v1`, and a second merge the same day is `2026-09-13-v2`. Pick one from
+[the tags page](https://github.com/pattern-labs-foundation/code-standards/tags).
 
 | Ref | Behaviour | Use when |
 |---|---|---|
-| `@main` | Latest rules. New rules can start failing your build. | You always want the newest rules |
-| A dated tag | Frozen. Never changes. | You control exactly when rules change |
+| A dated tag | Frozen. Never changes. | Preferred. You control exactly when rules change |
+| `main` | Latest rules. New rules can start failing your build. | You always want the newest |
 
 Pinning is preferred, so a new rule cannot fail your build unannounced. Bump
 it when you are ready to fix what it finds.
