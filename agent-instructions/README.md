@@ -42,13 +42,16 @@ Set under `with:` in the caller file.
 
 ## Pinning
 
-`@main` gives you rule changes as they land. To control when rules change, pin a version:
+Every merge into main is tagged automatically, so you can reference any point in time.
 
 ```yaml
-uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1.0.0
+uses: ...standards-review.yml@main     # always the latest rules
+uses: ...standards-review.yml@v1       # latest v1.x, moves as rules are added
+uses: ...standards-review.yml@v1.0.3   # frozen, never changes
 ```
 
-Bump the tag when you want the newer rules.
+Pin to `@v1.0.3` if you don't want new rules failing your builds until you're ready, then
+bump when you are.
 
 ## Whole organisation
 
