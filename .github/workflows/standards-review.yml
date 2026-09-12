@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       standards_ref:
-        description: 'Branch/tag/SHA of the standards to enforce.'
+        description: 'Branch/tag/SHA of the standards to enforce. Defaults to the same version as this workflow.'
         type: string
         required: false
-        default: main
+        default: ''
       fail_on_violation:
         description: 'Fail the check when a blocking violation is found.'
         type: boolean
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pattern-labs-foundation/code-standards
-          ref: ${{ inputs.standards_ref }}
+          ref: ${{ inputs.standards_ref != '' && inputs.standards_ref || github.job_workflow_sha }}
           path: .standards
 
       - name: Collect changed files

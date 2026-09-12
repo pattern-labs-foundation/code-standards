@@ -36,9 +36,22 @@ Set under `with:` in the caller file.
 
 | Input | Default | Effect |
 |---|---|---|
-| `standards_ref` | `main` | Branch/tag/SHA of the rules to enforce. Pin to a tag to freeze them. |
+| `standards_ref` | matches the version you called | Override which branch/tag/SHA of the rules to enforce. |
 | `fail_on_violation` | `true` | `false` reports findings without failing the check. |
 | `comment_on_pr` | `true` | `false` writes to the job summary only. |
+
+## Pinning
+
+Every merge into main is tagged automatically, so you can reference any point in time.
+
+```yaml
+uses: ...standards-review.yml@main     # always the latest rules
+uses: ...standards-review.yml@v1       # latest v1.x, moves as rules are added
+uses: ...standards-review.yml@v1.0.3   # frozen, never changes
+```
+
+Pin to `@v1.0.3` if you don't want new rules failing your builds until you're ready, then
+bump when you are.
 
 ## Whole organisation
 

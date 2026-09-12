@@ -1,0 +1,40 @@
+name: Tag on merge
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create the next version tag
+        run: |
+          LATEST=$(git tag -l 'v[0-9]*' --sort=-v:refname | head -1)
+
+          if [ -z "$LATEST" ]; then
+            NEXT="v1.0.0"
+          else
+            V="${LATEST#v}"
+            MAJOR=$(echo "$V" | cut -d. -f1)
+            MINOR=$(echo "$V" | cut -d. -f2)
+            PATCH=$(echo "$V" | cut -d. -f3)
+            NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+          fi
+
+          MAJOR_TAG="v$(echo "${NEXT#v}" | cut -d. -f1)"
+
+          git tag "$NEXT"
+          git push origin "$NEXT"
+
+          git tag -f "$MAJOR_TAG"
+          git push origin -f "$MAJOR_TAG"
+
+          echo "Tagged \`$NEXT\` (and moved \`$MAJOR_TAG\`)" >> "$GITHUB_STEP_SUMMARY"
