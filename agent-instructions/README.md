@@ -36,9 +36,19 @@ Set under `with:` in the caller file.
 
 | Input | Default | Effect |
 |---|---|---|
-| `standards_ref` | `main` | Branch/tag/SHA of the rules to enforce. Pin to a tag to freeze them. |
+| `standards_ref` | matches the version you called | Override which branch/tag/SHA of the rules to enforce. |
 | `fail_on_violation` | `true` | `false` reports findings without failing the check. |
 | `comment_on_pr` | `true` | `false` writes to the job summary only. |
+
+## Pinning
+
+`@main` gives you rule changes as they land. To control when rules change, pin a version:
+
+```yaml
+uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1.0.0
+```
+
+Bump the tag when you want the newer rules.
 
 ## Whole organisation
 
