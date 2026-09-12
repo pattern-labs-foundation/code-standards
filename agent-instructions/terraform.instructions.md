@@ -44,6 +44,11 @@ Full detail and rationale: https://github.com/<org>/code-standards/tree/main/ter
 - No NSG/firewall rule allowing `*`/`0.0.0.0/0` inbound, especially on management or database
   ports.
 - `min_tls_version`/HTTPS-only pinned to TLS 1.2+.
+- App Service/Function App/Container App compute has VNet integration
+  (`virtual_network_subnet_id`, `vnet_route_all_enabled`) by default - don't wait to confirm
+  the app calls an external endpoint before recommending it, since that usually isn't visible
+  from Terraform alone; app settings referencing a third-party URL/API key with no VNet
+  integration is a stronger-than-usual signal to raise it.
 
 ## Resource protection
 - `lifecycle { prevent_destroy = true }` on production databases/storage/Key Vaults.

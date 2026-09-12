@@ -110,3 +110,45 @@ settings enabled and routed to a Log Analytics workspace, so network traffic is 
 
 **Flag:** an NSG or VNet with no associated flow log / diagnostic setting resource anywhere in
 the codebase.
+
+## 7. VNet-integrate compute by default, don't wait to prove it calls out
+
+A reviewing agent generally cannot tell from Terraform alone whether an App Service, Function
+App, Container App, or similar compute resource's *application code* calls an external
+(non-Azure, third-party) endpoint - that's a runtime behavior of code the agent isn't looking
+at, not something the infrastructure declares. A few things in the Terraform/config are
+suggestive rather than conclusive: app settings/environment variables holding a third-party
+URL or API key (a payment gateway, `SENDGRID_API_KEY`, `STRIPE_*`, a webhook target), an
+existing NSG/firewall rule already allowing broad outbound access, or naming/tags like
+"integration," "webhook," "sync," or "gateway." Treat these as reasons to call the
+recommendation out explicitly in a review, not as a precondition for making it.
+
+Because detection is unreliable and workloads change over time (an "internal only" app
+commonly grows an external dependency later without anyone updating its network setup), the
+practical default is to VNet-integrate compute resources unconditionally, rather than only
+when external calls can be confirmed:
+
+```hcl
+resource "azurerm_linux_web_app" "app" {
+  # ...
+  virtual_network_subnet_id = azurerm_subnet.app_integration.id
+
+  site_config {
+    vnet_route_all_enabled = true # route ALL outbound traffic through the VNet, not just RFC1918 destinations
+  }
+}
+```
+
+Once outbound traffic actually flows through the VNet, egress can be controlled the same way
+regardless of whether today's code happens to call out: a route table sending traffic through
+Azure Firewall/an NVA (for logging and destination allow-listing), or a NAT Gateway for a
+stable, allow-listable outbound IP - which is exactly what's needed if a partner integration
+later requires IP allowlisting. Give the delegated integration subnet its own NSG per
+[rule 4](#4-segment-networks-by-functiontrust-boundary) rather than leaving it unrestricted.
+
+**Flag:** an App Service/Function App/Container App with no `virtual_network_subnet_id` (or
+equivalent VNet integration) at all, especially one whose app settings reference a
+third-party endpoint or API key; VNet integration present but `vnet_route_all_enabled`
+(or equivalent "route all" setting) left off, so outbound traffic bypasses the VNet's egress
+controls anyway; a compute resource's integration subnet with no NSG or UDR - VNet
+integration with no egress control on top of it doesn't add anything.

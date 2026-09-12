@@ -46,6 +46,12 @@ See [05-networking-and-private-access.md](./05-networking-and-private-access.md)
 - [ ] No NSG/firewall rule allowing `*`/`0.0.0.0/0` inbound, especially on management ports
       (22, 3389) or database ports.
 - [ ] `min_tls_version`/HTTPS-only settings are pinned to TLS 1.2+.
+- [ ] App Service/Function App/Container App compute has VNet integration
+      (`virtual_network_subnet_id` or equivalent) with `vnet_route_all_enabled` - recommend
+      this by default rather than only when the app is confirmed to call external endpoints,
+      since that generally isn't visible from Terraform alone. Treat app settings referencing
+      a third-party URL/API key with no VNet integration as a stronger-than-usual signal to
+      raise it.
 
 ## Resource Protection
 See [08-resource-protection-and-lifecycle.md](./08-resource-protection-and-lifecycle.md)
