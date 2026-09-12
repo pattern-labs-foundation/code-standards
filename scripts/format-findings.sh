@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# Turns a findings TSV (from review-csharp.sh / review-terraform.sh) into a
-# markdown PR comment.
-#
-# Usage: format-findings.sh <findings-tsv> <output-markdown> <standards-repo-url>
-# Exits 1 if there is at least one BLOCK finding, 0 otherwise.
 
 set -uo pipefail
 
@@ -18,7 +13,7 @@ if [ -s "$FINDINGS" ]; then
     warn_count=$(awk -F'\t' '$3 == "WARN"' "$FINDINGS" | wc -l | tr -d ' ')
 fi
 
-table() { # table <severity>
+table() {
     echo "| File | Line | Rule | Issue |"
     echo "|---|---|---|---|"
     awk -F'\t' -v sev="$1" '$3 == sev { printf "| `%s` | %s | `%s` | %s |\n", $1, $2, $4, $5 }' "$FINDINGS"

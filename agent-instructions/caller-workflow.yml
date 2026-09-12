@@ -10,9 +10,4 @@ permissions:
 
 jobs:
   standards:
-    # @main is the latest. To freeze, swap it for a dated tag from
-    # https://github.com/pattern-labs-foundation/code-standards/tags
     uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
-    # with:
-    #   fail_on_violation: false
-    #   comment_on_pr: false
