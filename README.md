@@ -8,6 +8,11 @@ reviewed against these rules with inline comments where code breaks them.
 
 MIT licensed. Anyone is welcome to use, fork, or adapt it.
 
+> **Already calling the reusable workflow?** It has been removed. A repo whose workflow still
+> has `uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`
+> will fail with "workflow not found". Delete that workflow file and follow the quick start
+> below instead. Details in [`agent-instructions/`](./agent-instructions#migrating-from-the-reusable-workflow).
+
 ## Quick start
 
 **1. Copy three files** from [`agent-instructions/`](./agent-instructions) into your repo:
