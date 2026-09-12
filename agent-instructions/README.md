@@ -1,64 +1,40 @@
 # Setup
 
-Copy these into your repo. GitHub Copilot reads them automatically and applies the standards
-when reviewing pull requests and when writing code.
+Copy the files you need into `.github/instructions/` in your repo:
 
-| Copy this | To here |
-|---|---|
-| [`copilot-instructions.md`](./copilot-instructions.md) | `.github/copilot-instructions.md` |
-| [`csharp.instructions.md`](./csharp.instructions.md) | `.github/instructions/csharp.instructions.md` |
-| [`terraform.instructions.md`](./terraform.instructions.md) | `.github/instructions/terraform.instructions.md` |
+- [`csharp.instructions.md`](./csharp.instructions.md) covers `**/*.cs`, `**/*.csproj`,
+  `**/appsettings*.json`
+- [`terraform.instructions.md`](./terraform.instructions.md) covers `**/*.tf`, `**/*.tfvars`
 
-Fill in the "Project context" section of `copilot-instructions.md` and drop whichever
-language files don't apply.
+The `applyTo` front matter scopes each file, so C# rules never fire on Terraform and vice
+versa.
 
-The `.instructions.md` files are path-scoped through their `applyTo` front matter, so each
-set of rules only fires on the files it applies to:
-
-| File | Scope |
-|---|---|
-| `csharp.instructions.md` | `**/*.cs`, `**/*.csproj`, `**/appsettings*.json` |
-| `terraform.instructions.md` | `**/*.tf`, `**/*.tfvars` |
-
-The project and config file types are in scope because several rules cover them, such as
-`<Nullable>enable</Nullable>` in a `.csproj` and secrets committed to `appsettings.json` or
-`.tfvars`.
+Optionally copy [`copilot-instructions.md`](./copilot-instructions.md) to
+`.github/copilot-instructions.md` for repo-wide guidance that applies to every file.
 
 ## Turn the review on
 
 **Settings → Copilot → Code review →** tick **Automatically request Copilot code review**.
 
-Copilot then reviews every new pull request against these standards and leaves inline
-comments on the lines where it finds problems.
+## Make findings block a merge
 
-## Make it block merges
+Copilot comments do not block on their own.
 
-Copilot comments do not block a merge on their own. To require them to be dealt with:
+**Settings → Rules → Rulesets →** your `main` ruleset:
 
-**Settings → Rules → Rulesets →** your ruleset for `main`
-
-- Set **Enforcement status** to **Active**, or none of the rules apply
+- Set **Enforcement status** to **Active**, or nothing applies
 - Tick **Require a pull request before merging**
 - Tick **Require conversation resolution before merging**
 
 Unresolved Copilot comments then block the merge.
 
-## Migrating from the reusable workflow
+## Notes
 
-Earlier versions shipped a reusable workflow that repos called with
-`uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`.
-That workflow has been removed, so any repo still calling it will fail with a
-"workflow not found" error.
+Re-copy the files when the standards change here.
 
-To migrate, delete that caller workflow from your repo and follow the setup above instead.
+Reviews draw on the account's Copilot premium request quota. Each push to a PR costs another
+request if **Review new pushes** is on.
 
-## Keeping up to date
-
-Re-copy the files when the standards here change. They are condensed checklists that change
-rarely, so this is occasional rather than ongoing.
-
-## Cost
-
-Copilot code review draws on the account's premium request quota, including the free tier's
-monthly allowance. Each push to a PR consumes another request if **Review new pushes** is on,
-so turn that off if you hit the cap.
+If a repo still calls the old reusable workflow
+(`pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`), it has
+been removed. Delete that workflow file and follow the setup above.

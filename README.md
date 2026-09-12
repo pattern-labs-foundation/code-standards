@@ -1,63 +1,50 @@
-# code-standards
+# 📐 code-standards
 
-Coding standards for C# and Terraform on Azure, written so an AI reviewer can apply them to
-pull requests.
+Coding standards for **C#** and **Terraform on Azure**, written for GitHub Copilot to enforce
+on pull requests.
 
-Copy the instruction files into your repo, turn on Copilot code review, and every PR gets
-reviewed against these rules with inline comments where code breaks them.
+![MIT](https://img.shields.io/badge/license-MIT-green) ![Copilot](https://img.shields.io/badge/enforced%20by-GitHub%20Copilot-blue)
 
-MIT licensed. Anyone is welcome to use, fork, or adapt it.
+## 🚀 Setup
 
-> **Already calling the reusable workflow?** It has been removed. A repo whose workflow still
-> has `uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`
-> will fail with "workflow not found". Delete that workflow file and follow the quick start
-> below instead. Details in [`agent-instructions/`](./agent-instructions#migrating-from-the-reusable-workflow).
+**1. Copy the files you need into `.github/instructions/` in your repo:**
 
-## Quick start
+- 🟦 [`csharp.instructions.md`](./agent-instructions/csharp.instructions.md)
+- 🟪 [`terraform.instructions.md`](./agent-instructions/terraform.instructions.md)
 
-**1. Copy three files** from [`agent-instructions/`](./agent-instructions) into your repo:
+**2. Turn on Copilot code review.** ⚠️ Copying does nothing without this.
 
-| Copy this | To here |
+> **Settings → Copilot → Code review →** ✅ **Automatically request Copilot code review**
+
+Open a PR and Copilot reviews it against the standards, commenting on the lines that break
+them. 🎉
+
+To make findings block a merge, see [`agent-instructions/`](./agent-instructions).
+
+## 📋 What's covered
+
+| File | Covers |
 |---|---|
-| `copilot-instructions.md` | `.github/copilot-instructions.md` |
-| `csharp.instructions.md` | `.github/instructions/csharp.instructions.md` |
-| `terraform.instructions.md` | `.github/instructions/terraform.instructions.md` |
+| 🟦 [`csharp.instructions.md`](./agent-instructions/csharp.instructions.md) | Architecture, DI, the Options pattern, async, error handling, logging, API design, EF Core, security, performance, testing, nullable reference types, style, immutability, disposal |
+| 🟪 [`terraform.instructions.md`](./agent-instructions/terraform.instructions.md) | State, auth and identity, RBAC, secrets and Key Vault, networking, modules, naming, resource protection, logging, CI/CD, style, policy scanning |
 
-**2. Turn Copilot code review on in your repo.** Copying the files does nothing on its own.
+Every rule has:
 
-**Settings → Copilot → Code review →** tick **Automatically request Copilot code review**.
+- ✅ a rationale
+- ✅ a `Bad` / `Good` example
+- ✅ a clear "flag when" condition
 
-That's it. Open a PR and Copilot reviews it against these standards.
+The file you copy **is** the standard, so what you read is what gets enforced. No summaries,
+no drift.
 
-To make findings block a merge, and for the rest of the setup, see
-[`agent-instructions/`](./agent-instructions).
+## 🔐 The Terraform through-line
 
-## The standards
+> Prefer **Azure RBAC and managed identity** over static access keys, SAS tokens, connection
+> strings, and service principal secrets.
 
-| | |
-|---|---|
-| [`csharp/`](./csharp) | Architecture, DI, the Options pattern, async, error handling, logging, API design, EF Core, security, performance, testing, nullable reference types, style, immutability, disposal |
-| [`terraform-azure/`](./terraform-azure) | State, auth and identity, RBAC, secrets and Key Vault, networking, modules, naming and tagging, resource protection, logging, CI/CD, style, policy scanning |
+## 🤝 Contributing
 
-Each folder has numbered topic files with rationale and `Bad`/`Good` examples, plus a
-`REVIEW-CHECKLIST.md` condensing them into a reviewer-facing list. The instruction files are
-the condensed version of those checklists.
+Pull requests welcome. New rules need a rationale, a `Bad`/`Good` example, and a "flag when"
+condition.
 
-The Terraform rules centre on one theme: prefer Azure RBAC and managed identity over static
-access keys, SAS tokens, connection strings, and service principal secrets.
-
-## Why instructions rather than a linter
-
-These rules need judgment. Whether a class has too many responsibilities, whether an
-abstraction earns its place, whether a config value belongs in an options class, none of that
-is reliably decidable by pattern matching. A reviewer that reads the code does a better job
-than regex, and there is nothing to maintain.
-
-Rules that are purely mechanical can still be enforced the usual ways: analyzers and
-`.editorconfig` for C#, `tfsec` or `checkov` for Terraform.
-
-## Contributing
-
-Pull requests welcome. New standards need a short rationale, a `Bad`/`Good` example, and a
-"flag when" condition so a reviewer can act on it directly. Update the matching
-`REVIEW-CHECKLIST.md` and the relevant file in `agent-instructions/` in the same change.
+📄 MIT licensed. Use, fork, or adapt it.
