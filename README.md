@@ -21,6 +21,73 @@ them. 🎉
 
 To make findings block a merge, see [`agent-instructions/`](./agent-instructions).
 
+## ⚙️ Run in a pipeline
+
+Copilot code review only reads instructions inside the repo being reviewed, so it can't point
+at this repo. A pipeline can, using Copilot CLI. Add this workflow to the repo:
+
+```yaml
+name: Standards review
+on: pull_request
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v6
+        with:
+          repository: pattern-labs-foundation/code-standards
+          path: code-standards
+      - run: npm install -g @github/copilot
+      - run: |
+          git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+          copilot -s -p "Review this diff against these standards. List each violation with file, line and reason.
+          STANDARDS:
+          $(cat code-standards/agent-instructions/csharp.instructions.md)
+          DIFF:
+          $(cat pr.diff)"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+```
+
+Swap in `terraform.instructions.md` for Terraform repos.
+
+- The review appears in the job log, not as inline PR comments.
+- An org owner must enable **Org Settings → Copilot → Policies → Allow use of Copilot CLI
+  billed to the organization**.
+
+## 🏢 Org-wide
+
+**Turn review on for every repo:**
+
+> **Org Settings → Repository → Rulesets → New branch ruleset →** target **All repositories**
+> **→** ✅ **Automatically request Copilot code review**
+
+**Apply standards to every repo:**
+
+> **Org Settings → Copilot → Custom instructions**
+
+This is a single text box with no `applyTo` scoping, so every rule applies to every file. Keep
+it to cross-cutting rules and still copy the language files into each repo.
+
+## 💳 What you need
+
+| To | Plan or setting |
+|---|---|
+| Use Copilot code review | PR author has a Copilot licence, **or** the org enables **Premium request paid usage** and **Allow members without a Copilot license to use Copilot code review** (billed to the org) |
+| Org ruleset on private repos | GitHub **Team** or **Enterprise Cloud** (Free covers public repos only) |
+| Org custom instructions | Copilot **Business** or **Enterprise** |
+| Pipeline | Copilot CLI policy above, billed to the org |
+
+No separate Azure or GitHub subscription is needed beyond these.
+
 ## 📋 What's covered
 
 | File | Covers |
