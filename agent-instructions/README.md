@@ -1,33 +1,79 @@
-# Agent Instructions
+# Setup
 
-Copy-paste starting points for wiring standards from [`/csharp`](../csharp) and
-[`/terraform-azure`](../terraform-azure) into a consuming repository's PR review process.
-Pick the one(s) that match how the team reviews PRs.
+Add one file to your repo. It calls the workflow in this repo, so the rules stay here and you
+get updates automatically.
 
-## If the team uses GitHub Copilot's PR code review
+Works on any repo including free personal accounts. No API key, no Copilot, no paid anything.
 
-Copilot's automatic PR review (and Copilot Chat/coding agent in the same repo) reads custom
-instructions straight out of the repository - no GitHub Actions workflow required.
+## Single repo
 
-1. **Repo-wide instructions:** copy [`copilot-instructions.md`](./copilot-instructions.md) to
-   `.github/copilot-instructions.md` in the consuming repo. Fill in the "Project context"
-   section and trim whichever language section(s) don't apply.
-2. **Path-scoped instructions (recommended for multi-language repos):** copy whichever of the
-   following apply into `.github/instructions/`:
-   - [`csharp.instructions.md`](./csharp.instructions.md) - `applyTo: "**/*.cs"`
-   - [`terraform.instructions.md`](./terraform.instructions.md) - `applyTo: "**/*.tf"`
-3. Keep the standards in sync by either:
-   - vendoring this repo's `csharp/`/`terraform-azure/` folders into the consuming repo (e.g.
-     as a git submodule under `standards/`) and referencing individual files from the
-     instructions, or
-   - periodically copying the condensed `REVIEW-CHECKLIST.md` content into the instructions
-     files directly (simplest, but drifts over time).
+Copy [`caller-workflow.yml`](./caller-workflow.yml) to `.github/workflows/standards-review.yml`:
 
-## If the team wants a custom agent running on a GitHub Actions runner
+```yaml
+name: Standards Review
 
-Use [`pr-review-agent-workflow.yml`](./pr-review-agent-workflow.yml) as a starting point. It
-checks out this standards repo alongside the PR's code and runs an LLM-based review step
-against the diff (using whichever checklist matches what changed), posting results back as a
-PR comment/review. Swap in whichever agent/runner the team already uses; the important part
-is that two things get checked out (the PR's code and this standards repo) and fed to one
-prompt.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  standards:
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+```
+
+Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
+violations fail the check.
+
+To require it before merge, add it as a required status check in your branch protection rules.
+
+## Options
+
+Set under `with:` in the caller file.
+
+| Input | Default | Effect |
+|---|---|---|
+| `standards_ref` | `main` | Branch/tag/SHA of the rules to enforce. Pin to a tag to freeze them. |
+| `fail_on_violation` | `true` | `false` reports findings without failing the check. |
+| `comment_on_pr` | `true` | `false` writes to the job summary only. |
+
+## Whole organisation
+
+- **Workflow template:** put the caller file in your org's public `.github` repo at
+  `workflow-templates/standards-review.yml`. It then shows up as a one-click add under the
+  Actions tab of every repo in the org.
+- **Repo template:** put the caller file in your org's repository template so new repos have
+  it from the start.
+- **Bulk add:** loop over `gh repo list YOUR-ORG` and open a PR adding the file to each repo.
+
+Forcing it on every repo automatically needs GitHub Enterprise (repository rulesets with
+required workflows). The options above are free.
+
+## What gets checked
+
+Deterministic pattern checks in [`/scripts`](../scripts). Findings are **blocking** (fails the
+check) or **advisory** (reported only).
+
+**C#:** `IConfiguration` outside the composition root, magic-string config lookups, `.Result`/
+`.Wait()`, `async void`, `throw ex;`, empty catch, `Console.WriteLine`, interpolated log
+messages, `new HttpClient()`, singleton `DbContext`, interpolated SQL, hardcoded credentials,
+missing `<Nullable>enable</Nullable>` and `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
+
+**Terraform/Azure:** SAS tokens and access keys where RBAC works, client secrets, `Owner`/
+`Contributor` assignments, subscription-scoped assignments, shared key auth, backend access
+keys, `-lock=false`, hardcoded secrets, Key Vault purge protection off, public network access
+on, open NSG rules, TLS below 1.2, `default_action = "Allow"`, `ignore_changes = all`,
+`-auto-approve`, data resources missing `prevent_destroy` or `azurerm_management_lock`.
+
+Judgment-based rules (SOLID, class responsibilities, abstraction quality) stay in the
+checklists for human reviewers.
+
+## Optional: Copilot
+
+If you have a paid Copilot plan, copy [`copilot-instructions.md`](./copilot-instructions.md)
+to `.github/copilot-instructions.md`, and [`csharp.instructions.md`](./csharp.instructions.md)
+and [`terraform.instructions.md`](./terraform.instructions.md) into `.github/instructions/`.
+Copilot's free tier does not include PR review.
