@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   standards:
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
 ```
 
 Done. Every PR into `main` gets checked, findings are posted as a PR comment, and blocking
@@ -42,16 +42,16 @@ Set under `with:` in the caller file.
 
 ## Which version to use
 
-Every merge into main is tagged automatically, so you can reference any point in time.
+Every merge into main is tagged with the date, so you can reference any point in time.
+Tags look like `2026-09-13-v1`, and a second merge the same day is `2026-09-13-v2`.
 
 | Ref | Behaviour | Use when |
 |---|---|---|
-| `@v1` | Latest rules within v1. New rules can start failing your build. | Recommended default |
-| `@v1.0.3` | Frozen. Never changes. | You want to control exactly when rules change |
-| `@main` | Bleeding edge, including unreleased changes. | Trying things out |
+| `@main` | Latest rules. New rules can start failing your build. | Recommended default |
+| `@2026-09-13-v1` | Frozen. Never changes. | You want to control exactly when rules change |
 
-Pin to an exact version if a new rule failing your build unannounced would be a problem, then
-bump the tag when you are ready to fix what it finds.
+Pin to a dated tag if a new rule failing your build unannounced would be a problem, then bump
+it when you are ready to fix what it finds.
 
 ## Whole organisation
 

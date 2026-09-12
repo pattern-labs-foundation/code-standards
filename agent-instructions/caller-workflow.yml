@@ -10,8 +10,8 @@ permissions:
 
 jobs:
   standards:
-    # @v1 latest rules in v1 | @v1.0.3 frozen | @main bleeding edge
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@v1
+    # @main for latest, or pin a dated tag like @2026-09-13-v1
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
     # with:
     #   fail_on_violation: false
     #   comment_on_pr: false
