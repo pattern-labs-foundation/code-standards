@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
 
+# permissions for the review job
 permissions:
   contents: read
   pull-requests: write
