@@ -1,26 +1,15 @@
-# Reusable workflow: enforces the coding standards in this repo against a pull
-# request in ANY other repository, on any GitHub plan including free personal
-# accounts.
-#
-# Consuming repos do not copy these rules. They call this workflow by reference,
-# so the rules stay here and every consumer picks up changes automatically.
-# See agent-instructions/caller-workflow.yml for the ~10 line file a consumer adds.
-#
-# Costs nothing: runs on GitHub-hosted runners (free minutes), uses only the
-# automatic GITHUB_TOKEN, and calls no external service or paid API.
-
 name: Standards Review
 
 on:
   workflow_call:
     inputs:
       standards_ref:
-        description: 'Branch/tag/SHA of the standards repo to enforce. Pin to a tag for stability.'
+        description: 'Branch/tag/SHA of the standards to enforce.'
         type: string
         required: false
         default: main
       fail_on_violation:
-        description: 'Fail the check when a blocking violation is found. Set false to report only.'
+        description: 'Fail the check when a blocking violation is found.'
         type: boolean
         required: false
         default: true
@@ -47,12 +36,7 @@ jobs:
           path: .standards
 
       - name: Collect changed files
-        id: changed
-        run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          git diff --name-only --diff-filter=ACMR "$BASE" HEAD > changed.txt
-          echo "Changed files:"
-          cat changed.txt
+        run: git diff --name-only --diff-filter=ACMR "${{ github.event.pull_request.base.sha }}" HEAD > changed.txt
 
       - name: Run standards checks
         id: check
@@ -76,7 +60,7 @@ jobs:
 
       - name: Comment on the pull request
         if: ${{ inputs.comment_on_pr }}
-        continue-on-error: true # forked-PR tokens are read-only; the step summary still has the findings
+        continue-on-error: true # forked-PR tokens are read-only, findings still land in the job summary
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md

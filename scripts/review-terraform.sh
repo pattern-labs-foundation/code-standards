@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-# Checks changed Terraform files against the mechanically-verifiable rules in
-# terraform-azure/REVIEW-CHECKLIST.md.
-#
 # Usage: review-terraform.sh <findings-tsv> [changed-file...]
-# Appends findings as: file <TAB> line <TAB> severity <TAB> rule <TAB> message
-# Severity is BLOCK (a real defect) or WARN (worth a look, may be intentional).
+# Appends: file <TAB> line <TAB> BLOCK|WARN <TAB> rule <TAB> message
 
 set -uo pipefail
 
@@ -33,10 +29,8 @@ check() {
     done
 }
 
-# ---------------------------------------------------------------------------
 # 03-rbac-and-access-control.md / 02-authentication-and-identity.md
-# The core theme: RBAC and managed identity over static, directly-usable tokens.
-# ---------------------------------------------------------------------------
+
 check 'azurerm_storage_account_sas|\bsas_token\s*=' \
     BLOCK 'rbac/no-sas-token' \
     'SAS token used where an azurerm_role_assignment to a managed identity would work. A leaked SAS token works for anyone until it expires or the key is rotated.'
@@ -65,9 +59,7 @@ check 'enable_rbac_authorization\s*=\s*false' \
     WARN 'rbac/key-vault-rbac' \
     'Key Vault using the legacy access-policy model. Prefer enable_rbac_authorization = true with role assignments.'
 
-# ---------------------------------------------------------------------------
 # 01-state-management.md
-# ---------------------------------------------------------------------------
 check '^\s*access_key\s*=' \
     BLOCK 'state/backend-azuread-auth' \
     'Backend authenticating with a storage access key. Use use_azuread_auth = true and grant the pipeline identity an RBAC role instead.'
@@ -76,9 +68,7 @@ check '\-lock=false' \
     BLOCK 'state/no-lock-disable' \
     'State locking disabled. Never disable locking for routine plan/apply.'
 
-# ---------------------------------------------------------------------------
 # 04-secrets-and-key-vault.md
-# ---------------------------------------------------------------------------
 check '(password|secret|api_key|access_token)[a-z_]*\s*=\s*"[^"$]{8,}"' \
     BLOCK 'secrets/no-hardcoded-secret' \
     'Looks like a hardcoded credential. Source it from Key Vault at apply time and never commit it.'
@@ -87,9 +77,7 @@ check 'purge_protection_enabled\s*=\s*false' \
     BLOCK 'secrets/key-vault-purge-protection' \
     'Key Vault purge protection disabled, so a deleted vault can be permanently purged with no recovery window.'
 
-# ---------------------------------------------------------------------------
 # 05-networking-and-private-access.md
-# ---------------------------------------------------------------------------
 check 'public_network_access_enabled\s*=\s*true' \
     BLOCK 'network/no-public-access' \
     'Public network access enabled. Disable it and reach the resource over a private endpoint unless there is a stated reason it must be publicly reachable.'
@@ -110,9 +98,7 @@ check 'enable_https_traffic_only\s*=\s*false|https_only\s*=\s*false' \
     BLOCK 'network/https-only' \
     'HTTPS-only disabled, allowing plaintext traffic.'
 
-# ---------------------------------------------------------------------------
 # 08-resource-protection-and-lifecycle.md
-# ---------------------------------------------------------------------------
 check 'ignore_changes\s*=\s*all' \
     BLOCK 'lifecycle/no-ignore-all' \
     'ignore_changes = all hides every drift, including security-relevant changes. List only the specific attributes genuinely managed elsewhere.'
@@ -121,11 +107,7 @@ check '\-auto-approve' \
     WARN 'lifecycle/no-auto-approve' \
     'terraform apply -auto-approve skips plan review. Gate shared/production applies behind a reviewed plan.'
 
-# ---------------------------------------------------------------------------
-# Per-file structural checks: data-bearing resources need prevent_destroy and a
-# management lock, so they cannot be destroyed by Terraform or deleted by hand
-# in the Portal/CLI/API.
-# ---------------------------------------------------------------------------
+# prevent_destroy and management lock, checked per file
 DATA_RESOURCES='azurerm_mssql_database|azurerm_mssql_server|azurerm_cosmosdb_account|azurerm_storage_account|azurerm_key_vault|azurerm_postgresql_flexible_server|azurerm_mysql_flexible_server'
 
 for f in "${tf_files[@]}"; do

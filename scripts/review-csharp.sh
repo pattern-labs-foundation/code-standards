@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-# Checks changed C# files against the mechanically-verifiable rules in
-# csharp/REVIEW-CHECKLIST.md.
-#
 # Usage: review-csharp.sh <findings-tsv> [changed-file...]
-# Appends findings as: file <TAB> line <TAB> severity <TAB> rule <TAB> message
-# Severity is BLOCK (a real defect) or WARN (worth a look, may be intentional).
+# Appends: file <TAB> line <TAB> BLOCK|WARN <TAB> rule <TAB> message
 
 set -uo pipefail
 
@@ -39,7 +35,7 @@ check() {
 }
 
 if [ "${#cs_files[@]}" -gt 0 ]; then
-    # 04-async-and-concurrency.md
+    # async
     check '\.(Result)\s*[;,)]|\.Wait\(\)|\.GetAwaiter\(\)\.GetResult\(\)' \
         BLOCK 'async/no-sync-over-async' \
         'Blocking on async code (.Result/.Wait()/.GetAwaiter().GetResult()) risks deadlock and thread-pool starvation. Await it instead.' \
@@ -50,7 +46,7 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'async void cannot be awaited and its exceptions cannot be caught by the caller. Use async Task (event handlers are the only exception).' \
         -- "${cs_files[@]}"
 
-    # 05-error-handling.md
+    # errors
     check 'throw\s+(ex|e|exception|error)\s*;' \
         BLOCK 'errors/rethrow-resets-stack' \
         'throw ex; resets the stack trace. Use a bare throw; to rethrow, or wrap the original as an InnerException.' \
@@ -66,7 +62,7 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'Throw a specific exception type (or a meaningful domain exception) rather than bare Exception.' \
         -- "${cs_files[@]}"
 
-    # 06-logging-and-observability.md
+    # logging
     check 'Console\.(WriteLine|Write)\s*\(' \
         WARN 'logging/no-console-writeline' \
         'Use an injected ILogger<T> rather than Console.WriteLine for application logging.' \
@@ -77,19 +73,19 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'String interpolation in a log call destroys structured logging. Use a message template with named placeholders: logger.LogInformation("... {OrderId}", id).' \
         -- "${cs_files[@]}"
 
-    # 10-performance.md
+    # performance
     check 'new\s+HttpClient\s*\(' \
         BLOCK 'performance/httpclient-factory' \
         'new HttpClient() per call can exhaust sockets under load. Use IHttpClientFactory or a registered typed client.' \
         -- "${cs_files[@]}"
 
-    # 02-dependency-injection.md / 08-data-access-ef-core.md
+    # di
     check 'AddSingleton<[^>]*DbContext' \
         BLOCK 'di/dbcontext-not-singleton' \
         'DbContext is not thread-safe and must be Scoped, never Singleton.' \
         -- "${cs_files[@]}"
 
-    # 09-security.md
+    # security
     check 'FromSqlRaw\s*\(\s*\$?"[^"]*\{' \
         BLOCK 'security/sql-injection' \
         'Interpolated/concatenated SQL is an injection risk. Use FromSqlInterpolated or explicit parameters.' \
@@ -100,7 +96,7 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
         'Looks like a hardcoded credential. Move it to configuration bound via IOptions<T>, sourced from a secret store.' \
         -- "${cs_files[@]}"
 
-    # 03-configuration-and-options.md: IConfiguration outside the composition root.
+    # config: IConfiguration outside the composition root
     app_files=()
     for f in "${cs_files[@]}"; do
         case "$(basename "$f")" in
@@ -121,7 +117,7 @@ if [ "${#cs_files[@]}" -gt 0 ]; then
     fi
 fi
 
-# 12-nullable-reference-types.md: project-level enforcement settings.
+# nullable: project-level enforcement
 for proj in "${csproj_files[@]:-}"; do
     [ -f "$proj" ] || continue
     if ! grep -qE '<Nullable>\s*enable\s*</Nullable>' "$proj"; then
@@ -134,7 +130,7 @@ for proj in "${csproj_files[@]:-}"; do
     fi
 done
 
-# 03-configuration-and-options.md: secrets committed in appsettings.
+# config: secrets committed in appsettings
 if [ "${#config_files[@]}" -gt 0 ]; then
     check '"[^"]*(Password|Pwd|AccountKey|SharedAccessKey)[^"]*"\s*:\s*"[^"{]{6,}"' \
         BLOCK 'config/secret-in-appsettings' \
