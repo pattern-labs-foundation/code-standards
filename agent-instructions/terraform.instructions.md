@@ -47,6 +47,9 @@ Full detail and rationale: https://github.com/<org>/code-standards/tree/main/ter
 
 ## Resource protection
 - `lifecycle { prevent_destroy = true }` on production databases/storage/Key Vaults.
+- An `azurerm_management_lock` with `CanNotDelete` (directly or via the resource group) on
+  anything holding business data - SQL, Cosmos DB, storage/blob, Key Vault -
+  `prevent_destroy` alone doesn't stop deletion through the Portal, CLI, or API.
 - No `ignore_changes = all`.
 - No `-auto-approve` against shared/production environments without a plan-review gate.
 

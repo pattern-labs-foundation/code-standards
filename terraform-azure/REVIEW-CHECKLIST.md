@@ -50,6 +50,10 @@ See [05-networking-and-private-access.md](./05-networking-and-private-access.md)
 ## Resource Protection
 See [08-resource-protection-and-lifecycle.md](./08-resource-protection-and-lifecycle.md)
 - [ ] Production databases/storage/Key Vaults have `lifecycle { prevent_destroy = true }`.
+- [ ] Anything holding business data (SQL servers/databases, Cosmos DB, storage
+      accounts/blob containers, Key Vaults) also has an `azurerm_management_lock` with
+      `CanNotDelete` (directly or inherited from its resource group) - `prevent_destroy`
+      alone doesn't stop deletion through the Portal, CLI, or API.
 - [ ] Backup/retention configured on data-bearing resources.
 - [ ] No `ignore_changes = all`; ignored attributes are specific and justified.
 - [ ] No `-auto-approve` against shared/production environments without a plan-review gate.
