@@ -2,12 +2,19 @@
 applyTo: "**/*.tf,**/*.tfvars"
 ---
 
-# 🔐 Terraform (Azure) Standards
+> [!IMPORTANT]
+> ## 🔐 Source: [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards)
+>
+> **This file is maintained upstream.** It is the standard itself, not a summary of one.
+>
+> | | |
+> |---|---|
+> | 📦 **Origin** | `agent-instructions/terraform.instructions.md` |
+> | 🔄 **Updates** | Sync from the source repository |
+> | 🐛 **Issues / improvements** | Raise them upstream, not here |
+> | 📄 **Licence** | MIT |
 
-> **Source:** [pattern-labs-foundation/code-standards](https://github.com/pattern-labs-foundation/code-standards) · 📄 MIT licensed
-> **File:** `agent-instructions/terraform.instructions.md`
-> This file is the standard itself, not a summary of one. Re-copy it from the source
-> repository to pick up changes, and raise issues or improvements there.
+# 🔐 Terraform (Azure) Standards
 
 Apply these when reviewing or writing Terraform for Azure in this repository. The rule
 running through all of them: prefer Azure RBAC and managed identity over static access
