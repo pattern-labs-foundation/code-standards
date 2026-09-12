@@ -40,18 +40,18 @@ Set under `with:` in the caller file.
 | `fail_on_violation` | `true` | `false` reports findings without failing the check. |
 | `comment_on_pr` | `true` | `false` writes to the job summary only. |
 
-## Pinning
+## Which version to use
 
-Every merge into main is tagged automatically, so you can reference any point in time.
+Every merge into main is tagged with the date, so you can reference any point in time.
+Tags look like `2026-09-13-v1`, and a second merge the same day is `2026-09-13-v2`.
 
-```yaml
-uses: ...standards-review.yml@main     # always the latest rules
-uses: ...standards-review.yml@v1       # latest v1.x, moves as rules are added
-uses: ...standards-review.yml@v1.0.3   # frozen, never changes
-```
+| Ref | Behaviour | Use when |
+|---|---|---|
+| `@main` | Latest rules. New rules can start failing your build. | Recommended default |
+| `@2026-09-13-v1` | Frozen. Never changes. | You want to control exactly when rules change |
 
-Pin to `@v1.0.3` if you don't want new rules failing your builds until you're ready, then
-bump when you are.
+Pin to a dated tag if a new rule failing your build unannounced would be a problem, then bump
+it when you are ready to fix what it finds.
 
 ## Whole organisation
 
