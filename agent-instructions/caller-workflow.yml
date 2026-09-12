@@ -10,8 +10,7 @@ permissions:
 
 jobs:
   standards:
-    # @main for latest, or pin a dated tag like @2026-09-13-v1
-    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main
+    uses: pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@2026-09-13-v1  # or @main for latest
     # with:
     #   fail_on_violation: false
     #   comment_on_pr: false
