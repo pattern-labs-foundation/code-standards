@@ -21,6 +21,8 @@ running through all of them: prefer Azure RBAC and managed identity over static 
 keys, SAS tokens, connection strings, and service principal secrets. Only flag what is
 visible in the diff.
 
+Start every comment raised from these standards with `📐 Project standard · <section> #<number>:`, for example `📐 Project standard · Secrets & Key Vault #1:`.
+
 ## State Management
 
 ### 1. Remote state in Azure Storage, never local state
