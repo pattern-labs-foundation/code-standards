@@ -13,8 +13,7 @@ on pull requests.
 - 🟪 [`terraform.instructions.md`](./agent-instructions/terraform.instructions.md)
 
 > [!WARNING]
-> Keep every instructions `.md` file **under 1,000 lines**. Copilot ignores rules past that.
-> If a file grows too long, trim it until it fits.
+> Reduce every instructions `.md` file to **under 1,000 lines**. Copilot ignores rules past that.
 
 **2. Turn on Copilot code review.** ⚠️ Copying does nothing without this.
 
