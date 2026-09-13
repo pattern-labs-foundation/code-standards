@@ -35,9 +35,8 @@ Sync the files when the standards change here.
 Reviews draw on the account's Copilot premium request quota. Each push to a PR costs another
 request if **Review new pushes** is on.
 
-Copilot code review ignores rules in an instructions file past 1,000 lines. Both files here
-stay under that; if you add rules, keep them under it too, or split into multiple
-`*.instructions.md` files with the same `applyTo` scope.
+Reduce every instructions file to under 1,000 lines. Copilot code review ignores rules past
+that.
 
 If a repo still calls the old reusable workflow
 (`pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`), it has

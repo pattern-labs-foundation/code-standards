@@ -12,6 +12,9 @@ on pull requests.
 - 🟦 [`csharp.instructions.md`](./agent-instructions/csharp.instructions.md)
 - 🟪 [`terraform.instructions.md`](./agent-instructions/terraform.instructions.md)
 
+> [!WARNING]
+> Reduce every instructions `.md` file to **under 1,000 lines**. Copilot ignores rules past that.
+
 **2. Turn on Copilot code review.** ⚠️ Copying does nothing without this.
 
 > **Settings → Copilot → Code review →** ✅ **Automatically request Copilot code review**
