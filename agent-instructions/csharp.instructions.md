@@ -18,6 +18,8 @@ applyTo: "**/*.cs,**/*.csproj,**/appsettings*.json"
 
 Apply these when reviewing or writing C# in this repository. Flag violations with the reason, not just the rule. Prioritise correctness and security over style. Only flag what is visible in the diff.
 
+Start every comment raised from these standards with `📐 Project standard · <section> #<number>:`, for example `📐 Project standard · Configuration & the Options Pattern #1:`.
+
 ## SOLID & Architecture
 
 ### 1. Depend on abstractions, not concretions
