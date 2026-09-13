@@ -36,8 +36,7 @@ Reviews draw on the account's Copilot premium request quota. Each push to a PR c
 request if **Review new pushes** is on.
 
 Copilot code review ignores rules in an instructions file past 1,000 lines. Both files here
-stay under that; if you add rules, keep them under it too, or split into multiple
-`*.instructions.md` files with the same `applyTo` scope.
+stay under that; if you add rules, trim until they still do.
 
 If a repo still calls the old reusable workflow
 (`pattern-labs-foundation/code-standards/.github/workflows/standards-review.yml@main`), it has

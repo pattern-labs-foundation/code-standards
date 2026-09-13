@@ -14,8 +14,7 @@ on pull requests.
 
 > [!WARNING]
 > Keep every instructions `.md` file **under 1,000 lines**. Copilot ignores rules past that.
-> If a file grows too long, split it into more `*.instructions.md` files with the same
-> `applyTo`.
+> If a file grows too long, trim it until it fits.
 
 **2. Turn on Copilot code review.** ⚠️ Copying does nothing without this.
 
